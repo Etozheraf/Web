@@ -1,0 +1,12 @@
+.internship-form__button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+
+    color: white;
+    font-family: Roboto, sans-serif;
+    font-size: 16px;
+
+    background-color: #02c657;
+    cursor: pointer;
+}

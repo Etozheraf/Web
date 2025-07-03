@@ -1,0 +1,54 @@
+.internship-list {
+    display: grid;
+    grid-template-rows: auto;
+    grid-template-columns: repeat(1, 99%);
+    gap: 20px;
+
+    width: 100%;
+    padding-right: 7%;
+    padding-left: 7%;
+}
+
+
+@media screen and (width >=576px) {
+    .internship-list {
+        grid-template-columns: repeat(2, 48%);
+        gap: 20px;
+
+        padding-right: 2%;
+        padding-left: 2%;
+    }
+}
+
+@media screen and (width >=768px) {
+    .internship-list {
+        grid-template-columns: repeat(2, 48%);
+        gap: 2vh;
+
+        padding-right: 2%;
+        padding-left: 2%;
+    }
+}
+
+@media screen and (width >=1024px) {
+    .internship-list {
+        grid-template-columns: repeat(3, 32%);
+        gap: 3vh;
+
+        padding-left: 2%;
+    }
+}
+
+@media screen and (width >=1200px) {
+    .internship-list {
+        grid-template-columns: repeat(3, 32%);
+        gap: 3vh;
+    }
+}
+
+@media screen and (width >=1440px) {
+    .internship-list {
+        grid-template-columns: repeat(3, 32%);
+        gap: 3vh;
+    }
+}

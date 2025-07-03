@@ -1,0 +1,9 @@
+.form {
+    margin-left: auto;
+}
+
+@media screen and (width >= 576px) {
+    .form {
+        margin-right: 2vw;
+    }
+}

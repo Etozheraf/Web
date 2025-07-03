@@ -1,0 +1,10 @@
+.internship-form__label {
+    display: block;
+
+    margin-bottom: 10px;
+
+    font-family: Roboto, sans-serif;
+    font-size: 17px;
+
+    /* font-weight: bold; */
+}

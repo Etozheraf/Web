@@ -1,0 +1,27 @@
+.footer__load-time {
+    width: 100%;
+}
+
+@media screen and (width <= 550px) {
+    .footer__load-time {
+        font-size: 8px;
+    }
+}
+
+@media screen and (width >= 551px) and (width <= 768px) {
+    .footer__load-time {
+        font-size: 9px;
+    }
+}
+
+@media screen and (width >= 769px) and (width <= 1440px) {
+    .footer__load-time {
+        font-size: 10px;
+    }
+}
+
+@media screen and (width >= 1441px) {
+    .footer__load-time {
+        font-size: 10px;
+    }
+}

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <!-- 🧠 Meta tags -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="keywords" content="Стажировки, Яндекс, Тинькофф, Контур, Касперский, работа" />
+    <meta name="description" content="Сервис для отслеживания стажировок" />
+
+    <!-- 📛 Title -->
+    <title>Стажировки</title>
+
+    <!-- 🔠 Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Inter" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
+
+    <!-- 🎨 External CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    <!-- <link rel="stylesheet" href="../outline-prototype/css/outline-prototype-label.css"> -->
+
+    <!-- 🧱 Base project styles -->
+    <link rel="stylesheet" href="../base/base.css" />
+
+    <!-- 🧩 Block styles (по алфавиту по блокам) -->
+    <link rel="stylesheet" href="../blocks/contacts/contacts.css" />
+    <link rel="stylesheet" href="../blocks/contacts/contacts__contact.css" />
+
+    <link rel="stylesheet" href="../blocks/form/form.css" />
+
+    <link rel="stylesheet" href="../blocks/header/header.css" />
+
+    <link rel="stylesheet" href="../blocks/internship-category-list/internship-category-list.css" />
+    <link rel="stylesheet" href="../blocks/internship-category-list/internship-category-list__item.css" />
+    <link rel="stylesheet" href="../blocks/internship-category-list/internship-category-list__item_active.css" />
+
+    <link rel="stylesheet" href="../blocks/internship-form/internship-form.css" />
+    <link rel="stylesheet" href="../blocks/internship-form/internship-form__button.css" />
+    <link rel="stylesheet" href="../blocks/internship-form/internship-form__button_lighter.css" />
+    <link rel="stylesheet" href="../blocks/internship-form/internship-form__input.css" />
+    <link rel="stylesheet" href="../blocks/internship-form/internship-form__label.css" />
+
+    <link rel="stylesheet" href="../blocks/internships-table/internships-table.css" />
+    <link rel="stylesheet" href="../blocks/internships-table/internships-table__td.css" />
+    <link rel="stylesheet" href="../blocks/internships-table/internships-table__td_header.css" />
+    <link rel="stylesheet" href="../blocks/internships-table/internships-table__td_last.css" />
+
+    <link rel="stylesheet" href="../blocks/footer/footer.css" />
+    <link rel="stylesheet" href="../blocks/footer/footer__load-time.css" />
+    <!-- <link rel="stylesheet" href="../blocks/footer/footer_fixed.css" /> -->
+
+    <link rel="stylesheet" href="../blocks/page/page.css" />
+
+    <link rel="stylesheet" href="../blocks/location/location.css" />
+
+    <link rel="stylesheet" href="../blocks/login/login.css" />
+
+    <link rel="stylesheet" href="../blocks/logo/logo.css" />
+
+    <link rel="stylesheet" href="../blocks/main/main.css" />
+    <link rel="stylesheet" href="../blocks/main/main__title.css" />
+
+    <link rel="stylesheet" href="../blocks/main-footer/main-footer.css" />
+
+    <link rel="stylesheet" href="../blocks/toast-bottom-right/toast-bottom-right.css" />
+
+    <!-- 🌟 Favicon -->
+    <link rel="icon" type="image/png" href="../img/Logo.png" />
+
+    <!-- 🧠 External scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <!-- 🚀 Project scripts (по алфавиту по блокам) -->
+    <script src="../blocks/footer/footer.js" defer></script>
+    <script src="../blocks/internship-category-list/internship-category-list.js" defer></script>
+    <script src="../blocks/internship-form/internship-form__button.js" defer></script>
+    <script src="../blocks/login/login.js" defer></script>
+    <script src="../blocks/toast-bottom-right/toast-bottom-right.js" defer></script>
+</head>
+
+<body>
+    <header class="header">
+        <img class="logo" src="../img/Logo.png">
+        <nav class="internship-category-list">
+            <a href="ml.html" class="internship-category-list__item">ML</a>
+            <a href="frontend.html" class="internship-category-list__item">Frontend</a>
+            <a href="../index.html" class="internship-category-list__item">Backend</a>
+        </nav>
+        <div class="form">
+            <p><a href="form.html">Мои стажировки</a></p>
+        </div>
+        <button href="user.html" class="login">Вход/Регистрация</button>
+    </header>
+
+    <div class="page">
+        <main class="main">
+            <p class="main__title">Мои стажировки</p>
+
+            <form class="internship-form">
+
+                <label for="internshipName" class="internship-form__label">Название стажировки:</label>
+                <input type="text" id="internshipName" name="internshipName" class="internship-form__input">
+
+                <label for="status" class="internship-form__label">Статус:</label>
+                <select id="status" name="status" class="internship-form__input">
+                    <option value="active">Активна</option>
+                    <option value="completed">Завершена</option>
+                    <option value="outdated">Устарела</option>
+                </select>
+
+                <label for="dates" class="internship-form__label">Даты (опционально):</label>
+                <input type="text" id="dates" name="dates" class="internship-form__input">
+
+                <button type="submit" class="internship-form__button">Добавить
+                    стажировку</button>
+            </form>
+
+            <table class="internships-table">
+                <thead>
+                    <tr>
+                        <th class="internships-table__td internships-table__td_header">Название</th>
+                        <th class="internships-table__td internships-table__td_header">Статус</th>
+                        <th class="internships-table__td internships-table__td_header">Даты</th>
+                        <th class="internships-table__td internships-table__td_header internships-table__td_last"></th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </main>
+
+        <footer class="footer">
+            <div class="main-footer">
+                <div class="contacts">
+                    <a class="contacts__contact" href="#"><span>Почта</span></a>
+                    <a class="contacts__contact" href="#"><span>Telegram</span></a>
+                    <a class="contacts__contact" href="#"><span>VK</span></a>
+                </div>
+                <div class="location">г. Санкт-Петербург 52</div>
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>
