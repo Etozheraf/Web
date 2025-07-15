@@ -23,7 +23,7 @@ document.querySelector(".login").addEventListener("click", () => {
             console.log('Логин:', result.value.username);
             console.log('Пароль:', result.value.password);
 
-            window.location.href = "user.html";
+            window.location.href = "user";
         }
     });
 }); 

@@ -1,0 +1,10 @@
+<footer class="footer">
+    <div class="main-footer">
+        <div class="contacts">
+            {{#each contacts}}
+            <a class="contacts__contact" href="{{this.href}}">{{this.label}}</a>
+            {{/each}}
+        </div>
+        <div class="location">{{location}}</div>
+    </div>
+</footer>

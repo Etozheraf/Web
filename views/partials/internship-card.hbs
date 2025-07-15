@@ -1,0 +1,9 @@
+<div class="internship-card {{#if closed}}internship-card_closed{{/if}}">
+  <a class="internship-card__header {{headerClass}}" href="{{href}}">
+    <img src="{{logo}}" class="internship-card__logo" alt="{{alt}}">
+  </a>
+  <div class="internship-card__description">
+    <p>{{name}}</p>
+    {{#if status}}<p>{{{status}}}</p>{{/if}}
+  </div>
+</div>

@@ -1,0 +1,18 @@
+<main class="main">
+  <nav class="internship-list">
+    <p class="internships-list__title">Доступные стажировки</p>
+
+    {{#each internships}}
+      {{> internship-card
+        href=this.href
+        logo=this.logo
+        alt=this.alt
+        name=this.name
+        status=this.status
+        headerClass=this.headerClass
+        closed=this.closed
+      }}
+    {{/each}}
+
+  </nav>
+</main>

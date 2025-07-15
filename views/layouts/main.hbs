@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="keywords" content="Стажировки, Яндекс, Тинькофф, Контур, Касперский, работа" />
+    <meta name="description" content="Сервис для отслеживания стажировок" />
+    <title>Стажировки</title>
+    <link rel="icon" type="image/png" href='img/Logo.png' />
+
+    {{> shared }}
+
+    {{#each styles}}
+    <link rel="stylesheet" href="{{this}}" />
+    {{/each}}
+
+    {{#each scripts}}
+    <script src="{{this}}" defer></script>
+    {{/each}}
+</head>
+
+<body>
+    {{> header}}
+
+    <div class="page">
+        {{{ body }}}
+
+        {{> footer }}
+    </div>
+</body>
+
+</html>

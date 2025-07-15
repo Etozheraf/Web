@@ -1,0 +1,20 @@
+<header class="header">
+  <img class="logo" src="img/Logo.png">
+
+  {{#if menu}}
+  <nav class="internship-category-list">
+    {{#each menu}}
+    <a href="{{this.href}}"
+      class="internship-category-list__item {{#if this.active}}internship-category-list__item_active{{/if}}">
+      {{this.label}}
+    </a>
+    {{/each}}
+  </nav>
+  {{/if}}
+
+  <div class="form">
+    <p><a href="form">Мои стажировки</a></p>
+  </div>
+
+  {{> login}}
+</header>
