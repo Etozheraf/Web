@@ -3,14 +3,16 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import * as fs from 'fs';
-
 import * as hbs from 'hbs';
+import { section } from './hbs.helpers';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useStaticAssets(join(__dirname, '..', 'public'));
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('hbs');
+
+  hbs.registerHelper('section', section);
 
   const partialsPath = join(__dirname, '..', 'views', 'partials');
   console.log('Registering partials from:', partialsPath);

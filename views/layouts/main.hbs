@@ -11,13 +11,9 @@
 
     {{> shared }}
 
-    {{#each styles}}
-    <link rel="stylesheet" href="{{this}}" />
-    {{/each}}
+    {{{_sections.styles}}}
 
-    {{#each scripts}}
-    <script src="{{this}}" defer></script>
-    {{/each}}
+    {{{_sections.scripts}}}
 </head>
 
 <body>
@@ -28,6 +24,7 @@
 
         {{> footer }}
     </div>
+
 </body>
 
 </html>
