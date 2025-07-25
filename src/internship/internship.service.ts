@@ -1,41 +1,61 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma.service';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateInternshipDto } from './dto/create-internship.dto';
 import { UpdateInternshipDto } from './dto/update-internship.dto';
+import { Prisma } from '@prisma/client';
+import { CategoryService } from '../category/category.service';
+import { TagService } from '../tag/tag.service';
 
 @Injectable()
 export class InternshipService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private categoryService: CategoryService,
+    private tagService: TagService,
+  ) {}
 
   async create(createInternshipDto: CreateInternshipDto) {
-    const { tagIds, ...internshipData } = createInternshipDto;
-    
-    const internship = await this.prisma.internship.create({
+    const existingInternship = await this.prisma.internship.findUnique({
+      where: {
+        name: createInternshipDto.name,
+      },
+      select: { id: true },
+    });
+    if (existingInternship) {
+      throw new ConflictException('Internship with this name already exists');
+    }
+
+    const {
+      tags: tagNames,
+      category: categoryName,
+      ...internshipData
+    } = createInternshipDto;
+
+    const [category, tags] = await Promise.all([
+      this.categoryService.findOrCreate(categoryName),
+      Promise.all(
+        tagNames.map((tagName) => this.tagService.findOrCreate(tagName)),
+      ),
+    ]);
+
+    return this.prisma.internship.create({
       data: {
         ...internshipData,
-        closed: internshipData.closed ?? false,
-        tags: tagIds ? {
-          connect: tagIds.map(id => ({ id }))
-        } : undefined
+        category: {
+          connect: { id: category.id },
+        },
+        tags: {
+          connect: tags.map((tag) => ({ id: tag.id })),
+        },
       },
       include: {
         category: true,
-        tags: true
-      }
-    });
-
-    return internship;
-  }
-
-  async findAll() {
-    return this.prisma.internship.findMany({
-      include: {
-        category: true,
-        tags: true
+        tags: true,
       },
-      orderBy: {
-        date: 'desc'
-      }
     });
   }
 
@@ -47,81 +67,104 @@ export class InternshipService {
         tags: true,
         Request: {
           include: {
-            user: true
-          }
-        }
-      }
+            user: true,
+          },
+        },
+      },
     });
 
     if (!internship) {
-      throw new Error(`Internship with ID ${id} not found`);
+      throw new NotFoundException(`Internship with ID ${id} not found`);
     }
 
     return internship;
   }
 
   async findByCategory(categoryName: string) {
+    const category = await this.prisma.category.findUnique({
+      where: { name: categoryName },
+      select: { id: true },
+    });
+    if (!category) {
+      throw new NotFoundException(
+        `Category with name ${categoryName} not found`,
+      );
+    }
+
     return this.prisma.internship.findMany({
       where: {
         category: {
-          name: categoryName
-        }
+          name: categoryName,
+        },
       },
       include: {
         category: true,
-        tags: true
+        tags: true,
       },
       orderBy: {
-        date: 'desc'
-      }
+        date: 'desc',
+      },
     });
   }
 
   async update(id: number, updateInternshipDto: UpdateInternshipDto) {
-    const { tagIds, ...internshipData } = updateInternshipDto;
-    
-    const internship = await this.prisma.internship.update({
+    const currentInternship = await this.prisma.internship.findUnique({
       where: { id },
-      data: {
-        ...internshipData,
-        tags: tagIds ? {
-          set: tagIds.map(id => ({ id }))
-        } : undefined
-      },
-      include: {
-        category: true,
-        tags: true
-      }
+      include: { tags: true },
     });
 
-    return internship;
+    if (!currentInternship) {
+      throw new NotFoundException(`Internship with ID ${id} not found`);
+    }
+
+    const {
+      category: categoryName,
+      tags: tagNames = [],
+      ...internshipData
+    } = updateInternshipDto;
+
+    const dataToUpdate: Prisma.InternshipUpdateInput = {
+      ...internshipData,
+    };
+
+    const [category, tags] = await Promise.all([
+      categoryName ? this.categoryService.findOrCreate(categoryName) : null,
+      Promise.all(
+        (tagNames || []).map((tagName) =>
+          this.tagService.findOrCreate(tagName),
+        ),
+      ),
+    ]);
+
+    if (category) {
+      dataToUpdate.category = {
+        connect: { id: category.id },
+      };
+    }
+    if (tags.length > 0) {
+      dataToUpdate.tags = {
+        set: tags.map((tag) => ({ id: tag.id })),
+      };
+    }
+
+    return this.prisma.internship.update({
+      where: { id },
+      data: dataToUpdate,
+      include: {
+        category: true,
+        tags: true,
+      },
+    });
   }
 
   async remove(id: number) {
-    const internship = await this.prisma.internship.delete({
+    const internship = await this.prisma.internship.findUnique({
       where: { id },
-      include: {
-        category: true,
-        tags: true
-      }
     });
+    if (!internship) {
+      throw new NotFoundException(`Internship with id ${id} not found`);
+    }
 
-    return internship;
-  }
-
-  async getCategories() {
-    return this.prisma.category.findMany({
-      orderBy: {
-        name: 'asc'
-      }
-    });
-  }
-
-  async getTags() {
-    return this.prisma.tag.findMany({
-      orderBy: {
-        name: 'asc'
-      }
-    });
+    await this.prisma.internship.delete({ where: { id } });
   }
 }

@@ -3,7 +3,7 @@ export class CreateInternshipDto {
   category: string;
   date: string;
   imgUrl: string;
-  url: string;
-  closed?: boolean;
-  tagIds?: number[];
+  companyUrl: string;
+  closed: boolean;
+  tags: string[];
 }

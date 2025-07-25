@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateRequestDto } from './dto/create-request.dto';
-import { UpdateRequestDto } from './dto/update-request.dto';
 
 @Injectable()
 export class RequestService {
@@ -10,103 +9,38 @@ export class RequestService {
   async create(createRequestDto: CreateRequestDto) {
     const request = await this.prisma.request.create({
       data: {
-        internshipId: createRequestDto.internshipId,
+        name: createRequestDto.name,
+        status: createRequestDto.status,
+        date: createRequestDto.dates,
+
         userId: createRequestDto.userId,
-        status: createRequestDto.status || 'Active',
-        date: createRequestDto.date || new Date().toISOString()
+        internshipId: createRequestDto.internshipId,
       },
       include: {
-        internship: {
-          include: {
-            category: true
-          }
-        },
-        user: true
-      }
+        internship: true,
+        user: true,
+      },
     });
 
     return request;
-  }
-
-  async findAll() {
-    return this.prisma.request.findMany({
-      include: {
-        internship: {
-          include: {
-            category: true
-          }
-        },
-        user: true
-      },
-      orderBy: {
-        date: 'desc'
-      }
-    });
-  }
-
-  async findOne(id: number) {
-    return this.prisma.request.findUnique({
-      where: { id },
-      include: {
-        internship: {
-          include: {
-            category: true
-          }
-        },
-        user: true
-      }
-    });
-  }
-
-  async update(id: number, updateRequestDto: UpdateRequestDto) {
-    return this.prisma.request.update({
-      where: { id },
-      data: updateRequestDto,
-      include: {
-        internship: {
-          include: {
-            category: true
-          }
-        },
-        user: true
-      }
-    });
-  }
-
-  async remove(id: number) {
-    return this.prisma.request.delete({
-      where: { id }
-    });
-  }
-
-  async getAvailableInternships() {
-    return this.prisma.internship.findMany({
-      where: {
-        closed: false
-      },
-      include: {
-        category: true,
-        tags: true
-      },
-      orderBy: {
-        name: 'asc'
-      }
-    });
   }
 
   async findByUser(userId: number) {
     return this.prisma.request.findMany({
       where: { userId },
       include: {
-        internship: {
-          include: {
-            category: true
-          }
-        }
+        internship: true,
+        user: true,
       },
       orderBy: {
-        date: 'desc'
-      }
+        date: 'asc',
+      },
+    });
+  }
+
+  async remove(id: number) {
+    return this.prisma.request.delete({
+      where: { id },
     });
   }
 }

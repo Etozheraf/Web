@@ -1,6 +1,8 @@
 export class CreateRequestDto {
-  internshipId: number;
+  name: string;
+  status: 'Active' | 'Closed';
+  dates: string;
+
   userId: number;
-  status?: 'Active' | 'Closed';
-  date?: string;
+  internshipId: number;
 }

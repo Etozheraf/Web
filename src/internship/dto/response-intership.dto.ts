@@ -2,9 +2,9 @@ import { Internship } from '../entities/internship.entity';
 
 export class ResponseInternshipDto {
   private static readonly companyStyleMap: Record<string, string> = {
-    'Ozon': 'internship-card__header_ozon',
-    'Касперский': 'internship-card__header_kaspersky',
-    'Yadro': 'internship-card__header_yadro',
+    Ozon: 'internship-card__header_ozon',
+    Касперский: 'internship-card__header_kaspersky',
+    Yadro: 'internship-card__header_yadro',
     'Лига Цифровой Экономики': 'internship-card__header_liga',
   };
 

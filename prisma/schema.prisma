@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -16,44 +15,50 @@ datasource db {
 
 model User {
   id       Int       @id @default(autoincrement())
-  name     String
+  name     String    @unique
   email    String
   password String
+
   Request  Request[]
 }
 
 model Category {
   id          Int          @id @default(autoincrement())
-  name        String
+  name        String       @unique
+
   internships Internship[]
 }
 
 model Tag {
   id          Int          @id @default(autoincrement())
-  name        String
+  name        String       @unique
+
   internships Internship[]
 }
 
 model Internship {
-  id         Int       @id @default(autoincrement())
-  name       String
-  category   Category  @relation(fields: [categoryId], references: [id])
-  categoryId Int
+  id         Int     @id @default(autoincrement())
+  name       String  @unique
   date       String
   imgUrl     String
-  url        String
+  companyUrl String
   closed     Boolean
+
+  category   Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int
   tags       Tag[]
   Request    Request[]
 }
 
 model Request {
   id           Int        @id @default(autoincrement())
-  internship   Internship @relation(fields: [internshipId], references: [id])
-  internshipId Int
+  name         String
   status       Status
   date         String
-  user         User       @relation(fields: [userId], references: [id])
+
+  internship   Internship @relation(fields: [internshipId], references: [id], onDelete: Cascade)
+  internshipId Int
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       Int
 }
 
