@@ -8,20 +8,18 @@ export class ResponseInternshipDto {
     'Лига Цифровой Экономики': 'internship-card__header_liga',
   };
 
-  id: number;
   name: string;
   date: string;
   imgUrl: string;
-  url: string;
+  companyUrl: string;
   closed: boolean;
   customClass: string;
 
   constructor(entity: Internship) {
-    this.id = entity.id;
     this.name = entity.name;
     this.date = entity.date;
     this.imgUrl = entity.imgUrl;
-    this.url = entity.companyUrl;
+    this.companyUrl = entity.companyUrl;
     this.closed = entity.closed;
     this.customClass = ResponseInternshipDto.companyStyleMap[entity.name] || '';
   }

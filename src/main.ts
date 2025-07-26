@@ -16,12 +16,12 @@ async function bootstrap() {
 
   const partialsPath = join(__dirname, '..', 'views', 'partials');
   console.log('Registering partials from:', partialsPath);
-  
+
   if (fs.existsSync(partialsPath)) {
     const files = fs.readdirSync(partialsPath);
     console.log('Found partials files:', files);
-    
-    files.forEach(file => {
+
+    files.forEach((file) => {
       if (file.endsWith('.hbs')) {
         const partialName = file.replace('.hbs', '');
         const partialPath = join(partialsPath, file);

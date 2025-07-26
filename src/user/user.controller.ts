@@ -1,84 +1,46 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Render, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Render,
+  Res,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Response } from 'express';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get()
-  @Render('pages/user')
-  async getProfile(@Query('auth') auth: string) {
-    const isAuthorized = auth === 'Rafael';
-    let user: any;
-    
-    if (isAuthorized) {
-      user = await this.userService.findByName('Rafael');
-    } else {
-      user = null;
-    }
-
-    return {
-      styles: [
-        "blocks/loader/loader.css",
-        "blocks/loader/loader__spinner.css",
-        "blocks/main/main__title.css",
-        "blocks/user-profile/user-profile.css",
-        "blocks/user-profile/user-profile__el.css",
-        "blocks/user-profile/user-profile__el_hidden.css",
-      ],
-      scripts: [
-        "blocks/user-profile/user-profile.js"
-      ],
-      menu: [
-        {
-          href: '/internships',
-          active: false,
-          label: 'Internships'
-        },
-        {
-          href: '/requests',
-          active: false,
-          label: 'My Requests'
-        },
-        {
-          href: '/user',
-          active: true,
-          label: 'Profile'
-        }
-      ],
-      user: user || {
-        name: 'Guest',
-        email: 'guest@example.com'
-      },
-
-      contacts: [
-        {
-          "label": "Почта",
-          "href": "#",
-        },
-        {
-          "label": "Telegram",
-          "href": "#",
-        },
-        {
-          "label": "VK",
-          "href": "#",
-        }
-      ],
-      location: "г. Санкт-Петербург 52"
-    };
+  @Post('register')
+  async register(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
+    const user = await this.userService.register(createUserDto);
+    return res.redirect(`/user/${user.id}`);
   }
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  @Post('login')
+  async login(@Body() loginDto: LoginDto, @Res() res: Response) {
+    const user = await this.userService.login(loginDto);
+    return res.redirect(`/user/${user.id}`);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  @Render('pages/user')
+  async findOne(@Param('id') id: string) {
+    const user = await this.userService.findOne(+id);
+    return {
+      user: {
+        name: user.name,
+        email: user.email,
+      },
+    };
   }
 
   @Patch(':id')

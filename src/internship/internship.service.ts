@@ -91,20 +91,31 @@ export class InternshipService {
       );
     }
 
-    return this.prisma.internship.findMany({
+    const internships = await this.prisma.internship.findMany({
       where: {
-        category: {
-          name: categoryName,
-        },
+        categoryId: category.id,
       },
       include: {
         category: true,
         tags: true,
       },
-      orderBy: {
-        date: 'desc',
-      },
     });
+
+    internships.sort((a, b) => {
+      if (a.closed !== b.closed) {
+        return a.closed ? 1 : -1;
+      }
+
+      const aHasDate = a.date && a.date.trim() !== '';
+      const bHasDate = b.date && b.date.trim() !== '';
+      if (aHasDate !== bHasDate) {
+        return aHasDate ? -1 : 1;
+      }
+
+      return a.name.localeCompare(b.name);
+    });
+
+    return internships;
   }
 
   async update(id: number, updateInternshipDto: UpdateInternshipDto) {
