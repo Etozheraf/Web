@@ -7,6 +7,6 @@ export class AppController {
 
   @Get('/')
   redirectToInternships(@Res() res: Response) {
-    return res.redirect('/internship');
+    return res.redirect('/internship?category=Backend');
   }
 }

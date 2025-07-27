@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Res,
+  Query,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { InternshipService } from './internship.service';
@@ -24,13 +25,8 @@ export class InternshipController {
   ) {}
 
   @Get()
-  findDefaultCategory(@Res() res: Response) {
-    return res.redirect('/internship/Backend');
-  }
-
-  @Get(':categoryName')
   async findByCategory(
-    @Param('categoryName') categoryName: string,
+    @Query('category') categoryName: string,
     @Res() res: Response,
   ) {
     const [rawInternships, categories] = await Promise.all([
@@ -51,10 +47,16 @@ export class InternshipController {
     });
   }
 
-  @Get('add/:id')
-  async showAddForm(@Param('id') id: string, @Res() res: Response) {
-    const internship = await this.internshipService.findOne(+id);
-    return res.render('pages/add-internship', { internship });
+  @Get('add')
+  async showAddForm(@Res() res: Response) {
+    const categories = await this.categoryService.findAll();
+    const menu = categories.map(
+      (category) => new ResponseCategoryDto(category, ''),
+    );
+
+    return res.render('pages/internship-add', {
+      menu,
+    });
   }
 
   @Post('')
@@ -69,7 +71,7 @@ export class InternshipController {
   @Get('detail/:id')
   async findOne(@Param('id') id: string, @Res() res: Response) {
     try {
-      const internship = await this.internshipService.findOne(+id);
+      const internship = await this.internshipService.findOne(id);
       return res.render('pages/internship-detail', { internship });
     } catch {
       return res
@@ -85,14 +87,14 @@ export class InternshipController {
     @Res() res: Response,
   ) {
     const category = updateInternshipDto.category;
-    await this.internshipService.update(+id, updateInternshipDto);
+    await this.internshipService.update(id, updateInternshipDto);
     return res.redirect(`/internship/${category}`);
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string, @Res() res: Response) {
-    const category = await this.internshipService.findOne(+id);
-    await this.internshipService.remove(+id);
+    const category = await this.internshipService.findOne(id);
+    await this.internshipService.remove(id);
     return res.redirect(`/internship/${category.name}`);
   }
 }

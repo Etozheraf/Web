@@ -23,7 +23,7 @@ export class InternshipService {
       where: {
         name: createInternshipDto.name,
       },
-      select: { id: true },
+      select: { uuid: true },
     });
     if (existingInternship) {
       throw new ConflictException('Internship with this name already exists');
@@ -46,10 +46,10 @@ export class InternshipService {
       data: {
         ...internshipData,
         category: {
-          connect: { id: category.id },
+          connect: { uuid: category.uuid },
         },
         tags: {
-          connect: tags.map((tag) => ({ id: tag.id })),
+          connect: tags.map((tag) => ({ uuid: tag.uuid })),
         },
       },
       include: {
@@ -59,9 +59,9 @@ export class InternshipService {
     });
   }
 
-  async findOne(id: number) {
+  async findOne(uuid: string) {
     const internship = await this.prisma.internship.findUnique({
-      where: { id },
+      where: { uuid },
       include: {
         category: true,
         tags: true,
@@ -74,7 +74,7 @@ export class InternshipService {
     });
 
     if (!internship) {
-      throw new NotFoundException(`Internship with ID ${id} not found`);
+      throw new NotFoundException(`Internship with uuid ${uuid} not found`);
     }
 
     return internship;
@@ -83,7 +83,7 @@ export class InternshipService {
   async findByCategory(categoryName: string) {
     const category = await this.prisma.category.findUnique({
       where: { name: categoryName },
-      select: { id: true },
+      select: { uuid: true },
     });
     if (!category) {
       throw new NotFoundException(
@@ -93,7 +93,7 @@ export class InternshipService {
 
     const internships = await this.prisma.internship.findMany({
       where: {
-        categoryId: category.id,
+        categoryUuid: category.uuid,
       },
       include: {
         category: true,
@@ -118,14 +118,14 @@ export class InternshipService {
     return internships;
   }
 
-  async update(id: number, updateInternshipDto: UpdateInternshipDto) {
+  async update(uuid: string, updateInternshipDto: UpdateInternshipDto) {
     const currentInternship = await this.prisma.internship.findUnique({
-      where: { id },
+      where: { uuid },
       include: { tags: true },
     });
 
     if (!currentInternship) {
-      throw new NotFoundException(`Internship with ID ${id} not found`);
+      throw new NotFoundException(`Internship with uuid ${uuid} not found`);
     }
 
     const {
@@ -149,17 +149,17 @@ export class InternshipService {
 
     if (category) {
       dataToUpdate.category = {
-        connect: { id: category.id },
+        connect: { uuid: category.uuid },
       };
     }
     if (tags.length > 0) {
       dataToUpdate.tags = {
-        set: tags.map((tag) => ({ id: tag.id })),
+        set: tags.map((tag) => ({ uuid: tag.uuid })),
       };
     }
 
     return this.prisma.internship.update({
-      where: { id },
+      where: { uuid },
       data: dataToUpdate,
       include: {
         category: true,
@@ -168,14 +168,14 @@ export class InternshipService {
     });
   }
 
-  async remove(id: number) {
+  async remove(uuid: string) {
     const internship = await this.prisma.internship.findUnique({
-      where: { id },
+      where: { uuid },
     });
     if (!internship) {
-      throw new NotFoundException(`Internship with id ${id} not found`);
+      throw new NotFoundException(`Internship with uuid ${uuid} not found`);
     }
 
-    await this.prisma.internship.delete({ where: { id } });
+    await this.prisma.internship.delete({ where: { uuid } });
   }
 }

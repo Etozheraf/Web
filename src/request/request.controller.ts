@@ -28,9 +28,10 @@ export class RequestController {
   @Render('pages/form')
   async showUserRequestsPage(@Query('auth') auth: string) {
     const isAuthorized = auth === 'Rafael';
-    let user: number;
+    let user: string;
     if (isAuthorized) {
-      user = 1;
+      // This should be replaced with actual user ID from session or token
+      user = 'd8f8f8f8-f8f8-f8f8-f8f8-f8f8f8f8f8f8'; 
     } else {
       return {};
     }
@@ -61,7 +62,7 @@ export class RequestController {
 
   @Delete(':id')
   async remove(@Param('id') id: string, @Res() res: Response) {
-    await this.requestService.remove(+id);
+    await this.requestService.remove(id);
     return res.redirect('/requests');
   }
 }

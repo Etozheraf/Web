@@ -3,6 +3,6 @@ export class CreateRequestDto {
   status: 'Active' | 'Closed';
   dates: string;
 
-  userId: number;
-  internshipId: number;
+  userUuid: string;
+  internshipUuid: string;
 }

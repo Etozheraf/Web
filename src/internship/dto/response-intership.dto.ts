@@ -19,7 +19,7 @@ export class ResponseInternshipDto {
     this.name = entity.name;
     this.date = entity.date;
     this.imgUrl = entity.imgUrl;
-    this.companyUrl = entity.companyUrl;
+    this.companyUrl = `internship/detail/${entity.uuid}`;
     this.closed = entity.closed;
     this.customClass = ResponseInternshipDto.companyStyleMap[entity.name] || '';
   }

@@ -13,8 +13,8 @@ export class RequestService {
         status: createRequestDto.status,
         date: createRequestDto.dates,
 
-        userId: createRequestDto.userId,
-        internshipId: createRequestDto.internshipId,
+        userUuid: createRequestDto.userUuid,
+        internshipUuid: createRequestDto.internshipUuid,
       },
       include: {
         internship: true,
@@ -25,9 +25,9 @@ export class RequestService {
     return request;
   }
 
-  async findByUser(userId: number) {
+  async findByUser(userUuid: string) {
     return this.prisma.request.findMany({
-      where: { userId },
+      where: { userUuid },
       include: {
         internship: true,
         user: true,
@@ -38,9 +38,9 @@ export class RequestService {
     });
   }
 
-  async remove(id: number) {
+  async remove(uuid: string) {
     return this.prisma.request.delete({
-      where: { id },
+      where: { uuid },
     });
   }
 }

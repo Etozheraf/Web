@@ -2,7 +2,7 @@ import { Category } from '../../category/entities/category.entity';
 import { Tag } from '../../tag/entities/tag.entity';
 
 export class Internship {
-  id: number;
+  uuid: string;
   name: string;
   date: string;
   imgUrl: string;

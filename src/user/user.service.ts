@@ -49,12 +49,12 @@ export class UserService {
     return result;
   }
 
-  async findOne(id: number) {
+  async findOne(uuid: string) {
     const user = await this.prisma.user.findUnique({
-      where: { id },
+      where: { uuid },
     });
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new NotFoundException(`User with ID ${uuid} not found`);
     }
     return user;
   }
@@ -65,16 +65,16 @@ export class UserService {
     });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(uuid: string, updateUserDto: UpdateUserDto) {
     return this.prisma.user.update({
-      where: { id },
+      where: { uuid },
       data: updateUserDto,
     });
   }
 
-  async remove(id: number) {
+  async remove(uuid: string) {
     return this.prisma.user.delete({
-      where: { id },
+      where: { uuid },
     });
   }
 }
