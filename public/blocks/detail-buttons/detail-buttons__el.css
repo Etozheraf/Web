@@ -1,4 +1,4 @@
-.internship-form__button {
+.detail-buttons__el {
     padding: 10px 15px;
     border: none;
     border-radius: 5px;
@@ -9,8 +9,4 @@
 
     background-color: #02c657;
     cursor: pointer;
-
-    text-decoration: none;
-    display: inline-block;
-    margin-top: 20px;
 }

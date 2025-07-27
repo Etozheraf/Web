@@ -8,8 +8,12 @@ import {
   Delete,
   Res,
   Query,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
+import { diskStorage } from 'multer';
 import { InternshipService } from './internship.service';
 import { CreateInternshipDto } from './dto/create-internship.dto';
 import { UpdateInternshipDto } from './dto/update-internship.dto';
@@ -60,19 +64,47 @@ export class InternshipController {
   }
 
   @Post('')
+  @UseInterceptors(
+    FileInterceptor('imageFile', {
+      storage: diskStorage({
+        destination: './public/img',
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const filename = `${uniqueSuffix}-${file.originalname}`;
+          cb(null, filename);
+        },
+      }),
+    }),
+  )
   async create(
     @Body() createInternshipDto: CreateInternshipDto,
+    @UploadedFile() file: Express.Multer.File,
     @Res() res: Response,
   ) {
+    if (file) {
+      createInternshipDto.imgUrl = `/img/${file.filename}`;
+    }
+
+    createInternshipDto.closed = (createInternshipDto.closed as any) === 'true';
+
     const internship = await this.internshipService.create(createInternshipDto);
-    return res.redirect(`/internship/${internship.category.name}`);
+    return res.redirect(`/internship?category=${internship.category.name}`);
   }
 
-  @Get('detail/:id')
-  async findOne(@Param('id') id: string, @Res() res: Response) {
+  @Get('detail/:uuid')
+  async findOne(@Param('uuid') uuid: string, @Res() res: Response) {
     try {
-      const internship = await this.internshipService.findOne(id);
-      return res.render('pages/internship-detail', { internship });
+      const [categories, internship] = await Promise.all([
+        this.categoryService.findAll(),
+        this.internshipService.findOne(uuid),
+      ]);
+
+      const menu = categories.map(
+        (category) => new ResponseCategoryDto(category, ''),
+      );
+
+      return res.render('pages/internship-detail', { internship, menu });
     } catch {
       return res
         .status(404)
@@ -80,21 +112,64 @@ export class InternshipController {
     }
   }
 
-  @Patch(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() updateInternshipDto: UpdateInternshipDto,
-    @Res() res: Response,
-  ) {
-    const category = updateInternshipDto.category;
-    await this.internshipService.update(id, updateInternshipDto);
-    return res.redirect(`/internship/${category}`);
+  @Get('edit/:uuid')
+  async showEditForm(@Param('uuid') uuid: string, @Res() res: Response) {
+    try {
+      const [categories, internship] = await Promise.all([
+        this.categoryService.findAll(),
+        this.internshipService.findOne(uuid),
+      ]);
+
+      const menu = categories.map(
+        (category) => new ResponseCategoryDto(category, ''),
+      );
+
+      return res.render('pages/internship-edit', { internship, menu });
+    } catch {
+      return res
+        .status(404)
+        .render('pages/error', { message: 'Internship not found' });
+    }
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: string, @Res() res: Response) {
-    const category = await this.internshipService.findOne(id);
-    await this.internshipService.remove(id);
-    return res.redirect(`/internship/${category.name}`);
+  @Patch(':uuid')
+  @UseInterceptors(
+    FileInterceptor('imageFile', {
+      storage: diskStorage({
+        destination: './public/img',
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const filename = `${uniqueSuffix}-${file.originalname}`;
+          cb(null, filename);
+        },
+      }),
+    }),
+  )
+  async update(
+    @Param('uuid') uuid: string,
+    @Body() updateInternshipDto: UpdateInternshipDto,
+    @UploadedFile() file: Express.Multer.File,
+    @Res() res: Response,
+  ) {
+    if (file) {
+      updateInternshipDto.imgUrl = `/img/${file.filename}`;
+    } 
+
+    updateInternshipDto.closed = (updateInternshipDto.closed as any) === 'true';
+
+    delete (updateInternshipDto as any)._method;
+    delete (updateInternshipDto as any).imageFile;
+
+    const category = updateInternshipDto.category;
+    await this.internshipService.update(uuid, updateInternshipDto);
+    return res.redirect(`/internship?category=${category}`);
+  }
+
+  @Delete(':uuid')
+  async remove(@Param('uuid') uuid: string, @Res() res: Response) {
+    const internship = await this.internshipService.findOne(uuid);
+    await this.internshipService.remove(uuid);
+    return res.redirect(`/internship?category=${internship.category.name}`);
   }
 }

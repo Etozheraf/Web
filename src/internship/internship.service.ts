@@ -29,11 +29,18 @@ export class InternshipService {
       throw new ConflictException('Internship with this name already exists');
     }
 
-    const {
+    let {
       tags: tagNames,
       category: categoryName,
       ...internshipData
     } = createInternshipDto;
+
+    if (!categoryName) {
+      throw new ConflictException('Category is required for creating an internship');
+    }
+    if (!tagNames) {
+      tagNames = [];
+    }
 
     const [category, tags] = await Promise.all([
       this.categoryService.findOrCreate(categoryName),
@@ -65,11 +72,6 @@ export class InternshipService {
       include: {
         category: true,
         tags: true,
-        Request: {
-          include: {
-            user: true,
-          },
-        },
       },
     });
 

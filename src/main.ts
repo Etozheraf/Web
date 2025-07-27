@@ -5,6 +5,8 @@ import { AppModule } from './app.module';
 import * as fs from 'fs';
 import * as hbs from 'hbs';
 import { section } from './hbs.helpers';
+import * as methodOverride from 'method-override';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -33,6 +35,15 @@ async function bootstrap() {
   } else {
     console.error('Partials directory not found:', partialsPath);
   }
+
+  app.use(express.urlencoded({ extended: true }));
+  app.use(
+    methodOverride((req, res) => {
+      if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+        return req.body._method;
+      }
+    }),
+  );
 
   app.set('view options', {
     layout: 'layouts/main',
