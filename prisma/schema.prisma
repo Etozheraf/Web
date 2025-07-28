@@ -38,7 +38,7 @@ model Tag {
 
 model Internship {
   uuid       String  @id @default(uuid())
-  name       String  @unique
+  name       String
   date       String
   imgUrl     String
   companyUrl String
@@ -48,6 +48,8 @@ model Internship {
   categoryUuid String
   tags         Tag[]
   Request      Request[]
+
+  @@unique([name, categoryUuid])
 }
 
 model Request {

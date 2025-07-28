@@ -1,34 +1,44 @@
 {{#section 'styles'}}
-  <link rel="stylesheet" href="/blocks/internship-form/internship-form.css">
-  <link rel="stylesheet" href="/blocks/internship-form/internship-form__button.css">
-  <link rel="stylesheet" href="/blocks/internship-form/internship-form__button_lighter.css">
-  <link rel="stylesheet" href="/blocks/internship-form/internship-form__input.css">
-  <link rel="stylesheet" href="/blocks/internship-form/internship-form__label.css">
-  <link rel="stylesheet" href="/blocks/internships-table/internships-table.css">
-  <link rel="stylesheet" href="/blocks/internships-table/internships-table__td.css">
-  <link rel="stylesheet" href="/blocks/internships-table/internships-table__td_header.css">
-  <link rel="stylesheet" href="/blocks/internships-table/internships-table__td_last.css">
-  <link rel="stylesheet" href="/blocks/main/main__title.css">
-  <link rel="stylesheet" href="/blocks/toast-bottom-right/toast-bottom-right.css">
+<link rel="stylesheet" href="/blocks/internship-form/internship-form.css">
+<link rel="stylesheet" href="/blocks/internship-form/internship-form__button.css">
+<link rel="stylesheet" href="/blocks/internship-form/internship-form__button_lighter.css">
+<link rel="stylesheet" href="/blocks/internship-form/internship-form__input.css">
+<link rel="stylesheet" href="/blocks/internship-form/internship-form__label.css">
+<link rel="stylesheet" href="/blocks/internships-table/internships-table.css">
+<link rel="stylesheet" href="/blocks/internships-table/internships-table__td.css">
+<link rel="stylesheet" href="/blocks/internships-table/internships-table__td_header.css">
+<link rel="stylesheet" href="/blocks/internships-table/internships-table__td_last.css">
+<link rel="stylesheet" href="/blocks/main/main__title.css">
+<link rel="stylesheet" href="/blocks/toast-bottom-right/toast-bottom-right.css">
 {{/section}}
 
 {{#section 'scripts'}}
-  <script src="/blocks/internship-form/internship-form__button.js" defer></script>
-  <script src="/blocks/toast-bottom-right/toast-bottom-right.js" defer></script>
+<script src="/blocks/toast-bottom-right/toast-bottom-right.js" defer></script>
 {{/section}}
 
 <main class="main">
     <p class="main__title">Мои стажировки</p>
 
-    <form class="internship-form">
-        <label for="internshipName" class="internship-form__label">Название стажировки:</label>
-        <input type="text" id="internshipName" name="internshipName" class="internship-form__input">
+    <form class="internship-form" action="/requests" method="POST">
+        <label for="name" class="internship-form__label">Название заявки:</label>
+        <input type="text" id="name" name="name" class="internship-form__input"
+            placeholder="Введите название вашей заявки" required>
+
+        <label for="category" class="internship-form__label">Категория:</label>
+        <select id="category" name="category" class="internship-form__input">
+            {{#each menu}}
+            <option value="{{this.label}}">{{this.label}}</option>
+            {{/each}}
+        </select>
+
+        <label for="internshipName" class="internship-form__label">Стажировка:</label>
+        <input type="text" id="internshipName" name="internshipName" class="internship-form__input"
+            placeholder="Введите точное название существующей стажировки" required>
 
         <label for="status" class="internship-form__label">Статус:</label>
         <select id="status" name="status" class="internship-form__input">
-            <option value="active">Активна</option>
-            <option value="completed">Завершена</option>
-            <option value="outdated">Устарела</option>
+            <option value="Active">Активна</option>
+            <option value="Closed">Завершена</option>
         </select>
 
         <label for="dates" class="internship-form__label">Даты (опционально):</label>
@@ -45,16 +55,24 @@
                 <th class="internships-table__td internships-table__td_header">Статус</th>
                 <th class="internships-table__td internships-table__td_header">Даты</th>
                 <th class="internships-table__td internships-table__td_header internships-table__td_last"></th>
+                <th class="internships-table__td internships-table__td_header internships-table__td_last"></th>
             </tr>
         </thead>
         <tbody>
-            {{#each myInternships}}
+            {{#each myRequests}}
             <tr>
-                <td class="internships-table__td">{{name}}</td>
-                <td class="internships-table__td">{{status}}</td>
-                <td class="internships-table__td">{{dates}}</td>
+                <td class="internships-table__td">{{this.name}}</td>
+                <td class="internships-table__td">{{this.status}}</td>
+                <td class="internships-table__td">{{this.dates}}</td>
                 <td class="internships-table__td internships-table__td_last">
-                    <button style="background: none; border: none; color: red; cursor: pointer;">✖</button>
+                    <a href="/internship/detail/{{this.internshipUuid}}">🔗</a>
+                </td>
+                <td class="internships-table__td internships-table__td_last">
+                    <form action="/requests/{{this.uuid}}" method="POST" style="display: inline;">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit"
+                            style="background: none; border: none; color: red; cursor: pointer;">✖</button>
+                    </form>
                 </td>
             </tr>
             {{/each}}

@@ -10,9 +10,10 @@ import {
   Query,
   UseInterceptors,
   UploadedFile,
+  Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { diskStorage } from 'multer';
 import { InternshipService } from './internship.service';
 import { CreateInternshipDto } from './dto/create-internship.dto';
@@ -26,13 +27,16 @@ export class InternshipController {
   constructor(
     private readonly internshipService: InternshipService,
     private readonly categoryService: CategoryService,
-  ) {}
+  ) { }
 
   @Get()
   async findByCategory(
     @Query('category') categoryName: string,
     @Res() res: Response,
+    @Req() req: Request,
   ) {
+    const user = req.session['user'];
+
     const [rawInternships, categories] = await Promise.all([
       this.internshipService.findByCategory(categoryName),
       this.categoryService.findAll(),
@@ -48,11 +52,13 @@ export class InternshipController {
     return res.render('pages/internships', {
       internships,
       menu,
+      user,
     });
   }
 
   @Get('add')
-  async showAddForm(@Res() res: Response) {
+  async showAddForm(@Res() res: Response, @Req() req: Request) {
+    const user = req.session['user'];
     const categories = await this.categoryService.findAll();
     const menu = categories.map(
       (category) => new ResponseCategoryDto(category, ''),
@@ -60,6 +66,7 @@ export class InternshipController {
 
     return res.render('pages/internship-add', {
       menu,
+      user,
     });
   }
 
@@ -93,7 +100,8 @@ export class InternshipController {
   }
 
   @Get('detail/:uuid')
-  async findOne(@Param('uuid') uuid: string, @Res() res: Response) {
+  async findOne(@Param('uuid') uuid: string, @Res() res: Response, @Req() req: Request) {
+    const user = req.session['user'];
     try {
       const [categories, internship] = await Promise.all([
         this.categoryService.findAll(),
@@ -104,7 +112,7 @@ export class InternshipController {
         (category) => new ResponseCategoryDto(category, ''),
       );
 
-      return res.render('pages/internship-detail', { internship, menu });
+      return res.render('pages/internship-detail', { internship, menu, user });
     } catch {
       return res
         .status(404)
@@ -113,7 +121,8 @@ export class InternshipController {
   }
 
   @Get('edit/:uuid')
-  async showEditForm(@Param('uuid') uuid: string, @Res() res: Response) {
+  async showEditForm(@Param('uuid') uuid: string, @Res() res: Response, @Req() req: Request) {
+    const user = req.session['user'];
     try {
       const [categories, internship] = await Promise.all([
         this.categoryService.findAll(),
@@ -124,7 +133,7 @@ export class InternshipController {
         (category) => new ResponseCategoryDto(category, ''),
       );
 
-      return res.render('pages/internship-edit', { internship, menu });
+      return res.render('pages/internship-edit', { internship, menu, user });
     } catch {
       return res
         .status(404)
@@ -154,7 +163,7 @@ export class InternshipController {
   ) {
     if (file) {
       updateInternshipDto.imgUrl = `/img/${file.filename}`;
-    } 
+    }
 
     updateInternshipDto.closed = (updateInternshipDto.closed as any) === 'true';
 

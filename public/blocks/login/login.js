@@ -1,29 +1,123 @@
-document.querySelector(".login").addEventListener("click", () => {
+document.querySelector('.login').addEventListener('click', () => {
+  const showLogin = () => {
     Swal.fire({
-        title: 'Вход в систему',
-        html: `
-                <input type="text" id="username" class="swal2-input" placeholder="Логин">
-                <input type="password" id="password" class="swal2-input" placeholder="Пароль">
-            `,
-        confirmButtonText: 'Войти',
-        showCancelButton: true,
-        cancelButtonText: 'Отмена',
-        preConfirm: () => {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+      title: 'Вход в систему',
+      html: `
+        <input type="email" id="email" class="swal2-input" placeholder="Почта" required>
+        <input type="password" id="password" class="swal2-input" placeholder="Пароль" required>
+        <a href="#" id="show-register" style="display: block; margin-top: 10px;">У меня еще нет аккаунта</a>
+      `,
+      confirmButtonText: 'Войти',
+      showCancelButton: true,
+      cancelButtonText: 'Отмена',
+      didOpen: () => {
+        document.getElementById('show-register').addEventListener('click', (e) => {
+          e.preventDefault();
+          showRegister();
+        });
+      },
+      preConfirm: () => {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
 
-            if (!username || !password) {
-                Swal.showValidationMessage('Пожалуйста, введите логин и пароль');
+        if (!email || !password) {
+          Swal.showValidationMessage('Пожалуйста, введите почту и пароль');
+          return false;
+        }
+
+        return fetch('/user/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        })
+          .then(async (response) => {
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.message || 'Ошибка входа');
             }
-
-            return { username, password };
-        }
+            // The response from a redirect is special, we need to check the redirected status
+            if (response.redirected) {
+              window.location.href = response.url;
+              return;
+            }
+            return response.json();
+          })
+          .catch((error) => {
+            Swal.showValidationMessage(`Ошибка: ${error.message}`);
+          });
+      },
     }).then((result) => {
-        if (result.isConfirmed) {
-            console.log('Логин:', result.value.username);
-            console.log('Пароль:', result.value.password);
-
-            window.location.href = "user";
-        }
+      if (result.isConfirmed && result.value) {
+        // Redirect is handled in preConfirm
+      }
     });
+  };
+
+  const showRegister = () => {
+    Swal.fire({
+      title: 'Регистрация',
+      html: `
+        <input type="text" id="name" class="swal2-input" placeholder="Имя" required>
+        <input type="email" id="email" class="swal2-input" placeholder="Почта" required>
+        <input type="password" id="password" class="swal2-input" placeholder="Пароль" required>
+        <input type="password" id="confirm-password" class="swal2-input" placeholder="Подтвердите пароль" required>
+        <a href="#" id="show-login" style="display: block; margin-top: 10px;">Уже есть аккаунт? Войти</a>
+      `,
+      confirmButtonText: 'Зарегистрироваться',
+      showCancelButton: true,
+      cancelButtonText: 'Отмена',
+      didOpen: () => {
+        document.getElementById('show-login').addEventListener('click', (e) => {
+          e.preventDefault();
+          showLogin();
+        });
+      },
+      preConfirm: () => {
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+
+        if (!name || !email || !password || !confirmPassword) {
+          Swal.showValidationMessage('Пожалуйста, заполните все поля');
+          return false;
+        }
+
+        if (password !== confirmPassword) {
+          Swal.showValidationMessage('Пароли не совпадают');
+          return false;
+        }
+
+        return fetch('/user/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name, email, password }),
+        })
+          .then(async (response) => {
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.message || 'Ошибка регистрации');
+            }
+            if (response.redirected) {
+              window.location.href = response.url;
+              return;
+            }
+            return response.json();
+          })
+          .catch((error) => {
+            Swal.showValidationMessage(`Ошибка: ${error.message}`);
+          });
+      },
+    }).then((result) => {
+      if (result.isConfirmed && result.value) {
+        // Redirect is handled in preConfirm
+      }
+    });
+  };
+
+  showLogin();
 }); 

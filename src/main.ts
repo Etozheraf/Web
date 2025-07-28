@@ -7,6 +7,7 @@ import * as hbs from 'hbs';
 import { section } from './hbs.helpers';
 import * as methodOverride from 'method-override';
 import * as express from 'express';
+import * as session from 'express-session';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -42,6 +43,15 @@ async function bootstrap() {
       if (req.body && typeof req.body === 'object' && '_method' in req.body) {
         return req.body._method;
       }
+    }),
+  );
+
+  app.use(
+    session({
+      secret: 'test_secret', // можно просто строку, для тестов
+      resave: false,
+      saveUninitialized: false,
+      cookie: { maxAge: 60000 * 60 }, // 1 час
     }),
   );
 

@@ -19,9 +19,17 @@ export class InternshipService {
   ) {}
 
   async create(createInternshipDto: CreateInternshipDto) {
+    if (!createInternshipDto.category) {
+      throw new ConflictException('Category is required for creating an internship');
+    }
+    const category = await this.categoryService.findOrCreate(createInternshipDto.category);
+    
     const existingInternship = await this.prisma.internship.findUnique({
       where: {
-        name: createInternshipDto.name,
+        name_categoryUuid: {
+          name: createInternshipDto.name,
+          categoryUuid: category.uuid,
+        },
       },
       select: { uuid: true },
     });
@@ -34,20 +42,13 @@ export class InternshipService {
       category: categoryName,
       ...internshipData
     } = createInternshipDto;
-
-    if (!categoryName) {
-      throw new ConflictException('Category is required for creating an internship');
-    }
     if (!tagNames) {
       tagNames = [];
     }
 
-    const [category, tags] = await Promise.all([
-      this.categoryService.findOrCreate(categoryName),
-      Promise.all(
-        tagNames.map((tagName) => this.tagService.findOrCreate(tagName)),
-      ),
-    ]);
+    const tags = await Promise.all(
+      tagNames.map((tagName) => this.tagService.findOrCreate(tagName)),
+    );
 
     return this.prisma.internship.create({
       data: {
@@ -118,6 +119,30 @@ export class InternshipService {
     });
 
     return internships;
+  }
+
+
+  async findByNameAndCategory(name: string, categoryName: string) {
+    const category = await this.prisma.category.findUnique({
+      where: { name: categoryName },
+    });
+
+    if (!category) {
+      return null;
+    }
+
+    return this.prisma.internship.findUnique({
+      where: {
+        name_categoryUuid: {
+          name: name,
+          categoryUuid: category.uuid,
+        },
+      },
+      include: {
+        category: true,
+        tags: true,
+      },
+    });
   }
 
   async update(uuid: string, updateInternshipDto: UpdateInternshipDto) {

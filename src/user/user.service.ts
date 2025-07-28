@@ -49,6 +49,10 @@ export class UserService {
     return result;
   }
 
+  async validatePassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
+    return bcrypt.compare(plainPassword, hashedPassword);
+  }
+
   async findOne(uuid: string) {
     const user = await this.prisma.user.findUnique({
       where: { uuid },
@@ -66,9 +70,17 @@ export class UserService {
   }
 
   async update(uuid: string, updateUserDto: UpdateUserDto) {
+    const updateData = { ...updateUserDto };
+    
+    // Если передан новый пароль, хешируем его
+    if (updateData.password) {
+      const salt = await bcrypt.genSalt();
+      updateData.password = await bcrypt.hash(updateData.password, salt);
+    }
+
     return this.prisma.user.update({
       where: { uuid },
-      data: updateUserDto,
+      data: updateData,
     });
   }
 
