@@ -104,8 +104,6 @@ export class UserController {
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Res() res: Response) {
     try {
-      delete (updateUserDto as any)._method;
-      
       if (!updateUserDto.currentPassword) {
         return res.status(400).render('pages/error', { message: 'Необходимо ввести текущий пароль' });
       }

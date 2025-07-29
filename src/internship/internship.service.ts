@@ -4,8 +4,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateInternshipDto } from './dto/create-internship.dto';
-import { UpdateInternshipDto } from './dto/update-internship.dto';
+import { CreateInternshipInput } from './dto/create-internship.input';
+import { UpdateInternshipInput } from './dto/update-internship.input';
 import { Prisma } from '@prisma/client';
 import { CategoryService } from '../category/category.service';
 import { TagService } from '../tag/tag.service';
@@ -18,16 +18,16 @@ export class InternshipService {
     private tagService: TagService,
   ) {}
 
-  async create(createInternshipDto: CreateInternshipDto) {
-    if (!createInternshipDto.category) {
+  async create(input: CreateInternshipInput) {
+    if (!input.categoryName) {
       throw new ConflictException('Category is required for creating an internship');
     }
-    const category = await this.categoryService.findOrCreate(createInternshipDto.category);
+    const category = await this.categoryService.findOrCreate(input.categoryName);
     
     const existingInternship = await this.prisma.internship.findUnique({
       where: {
         name_categoryUuid: {
-          name: createInternshipDto.name,
+          name: input.name,
           categoryUuid: category.uuid,
         },
       },
@@ -39,9 +39,9 @@ export class InternshipService {
 
     let {
       tags: tagNames,
-      category: categoryName,
       ...internshipData
-    } = createInternshipDto;
+    } = input;
+
     if (!tagNames) {
       tagNames = [];
     }
@@ -53,6 +53,8 @@ export class InternshipService {
     return this.prisma.internship.create({
       data: {
         ...internshipData,
+        date: internshipData.date,
+        imgUrl: internshipData.imgUrl,
         category: {
           connect: { uuid: category.uuid },
         },
@@ -145,10 +147,9 @@ export class InternshipService {
     });
   }
 
-  async update(uuid: string, updateInternshipDto: UpdateInternshipDto) {
+  async update(uuid: string, input: UpdateInternshipInput) {
     const currentInternship = await this.prisma.internship.findUnique({
       where: { uuid },
-      include: { tags: true },
     });
 
     if (!currentInternship) {
@@ -156,22 +157,23 @@ export class InternshipService {
     }
 
     const {
-      category: categoryName,
-      tags: tagNames = [],
+      categoryName,
+      tags: rawTags,
       ...internshipData
-    } = updateInternshipDto;
+    } = input;
 
+    
     const dataToUpdate: Prisma.InternshipUpdateInput = {
       ...internshipData,
     };
 
     const [category, tags] = await Promise.all([
       categoryName ? this.categoryService.findOrCreate(categoryName) : null,
-      Promise.all(
-        (tagNames || []).map((tagName) =>
-          this.tagService.findOrCreate(tagName),
-        ),
-      ),
+      rawTags !== undefined
+        ? Promise.all(
+            rawTags.map((tagName) => this.tagService.findOrCreate(tagName)),
+          )
+        : null,
     ]);
 
     if (category) {
@@ -179,9 +181,10 @@ export class InternshipService {
         connect: { uuid: category.uuid },
       };
     }
-    if (tags.length > 0) {
+    
+    if (rawTags !== undefined) {
       dataToUpdate.tags = {
-        set: tags.map((tag) => ({ uuid: tag.uuid })),
+        set: tags?.map((tag) => ({ uuid: tag.uuid })) ?? [],
       };
     }
 

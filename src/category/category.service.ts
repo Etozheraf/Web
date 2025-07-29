@@ -1,11 +1,20 @@
-import { Injectable, NotImplementedException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-// import { CreateCategoryDto } from './dto/create-category.dto';
-// import { UpdateCategoryDto } from './dto/update-category.dto';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
 export class CategoryService {
   constructor(private prisma: PrismaService) {}
+
+  async create(createCategoryDto: CreateCategoryDto) {
+    if (!createCategoryDto.name) {
+      throw new ConflictException('Category name is required');
+    }
+    return this.prisma.category.create({
+      data: createCategoryDto,
+    });
+  }
 
   async findOrCreate(name: string) {
     let category = await this.prisma.category.findUnique({
@@ -28,15 +37,37 @@ export class CategoryService {
     });
   }
 
-  findOne(/*id: number*/) {
-    throw new NotImplementedException();
+  async findOne(uuid: string) {
+    const category = await this.prisma.category.findUnique({
+      where: { uuid },
+    });
+    
+    if (!category) {
+      throw new NotFoundException(`Category with uuid ${uuid} not found`);
+    }
+    
+    return category;
   }
 
-  update(/*id: number, updateCategoryDto: UpdateCategoryDto*/) {
-    throw new NotImplementedException();
+  async update(uuid: string, updateCategoryDto: UpdateCategoryDto) {
+    const category = await this.findOne(uuid);
+    
+    return this.prisma.category.update({
+      where: { uuid },
+      data: updateCategoryDto,
+    });
   }
 
-  remove(/*id: number*/) {
-    throw new NotImplementedException();
+  async remove(uuid: string) {
+    const category = await this.prisma.category.findUnique({
+      where: { uuid },
+    });
+    if (!category) {
+      throw new NotFoundException(`Category with uuid ${uuid} not found`);
+    }
+    
+    return this.prisma.category.delete({
+      where: { uuid },
+    });
   }
 }

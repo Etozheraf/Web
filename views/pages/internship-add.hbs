@@ -27,11 +27,20 @@
     <input type="text" id="date" name="date" class="internship-form__input">
 
     <label for="category" class="internship-form__label">Категория:</label>
-    <select id="category" name="category" class="internship-form__input">
+    <input list="categoryList" id="category" name="category" class="internship-form__input">
+    <datalist id="categoryList">
       {{#each menu}}
         <option value="{{this.label}}">{{this.label}}</option>
       {{/each}}
-    </select>
+    </datalist>
+
+    <label for="tags" class="internship-form__label">Теги (через запятую):</label>
+    <input list="tagList" type="text" id="tags" name="tags" class="internship-form__input">
+    <datalist id="tagList">
+      {{#each tags}}
+        <option value="{{this.name}}">{{this.name}}</option>
+      {{/each}}
+    </datalist>
 
     <div style="display: flex; align-items: center; margin-bottom: 15px;">
       <input type="checkbox" id="closed" name="closed" value="true" style="margin-right: 10px;">

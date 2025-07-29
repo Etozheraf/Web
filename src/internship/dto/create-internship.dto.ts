@@ -1,9 +1,9 @@
 export class CreateInternshipDto {
-  name: string;
-  category: string;
-  date: string;
-  imgUrl: string;
+  name: string;           
+  category: string;       
+  date?: string;          
   companyUrl: string;
-  closed: boolean;
-  tags: string[];
+  closed?: string;
+  tags?: string;
+  imgUrl?: string;
 }

@@ -21,12 +21,16 @@ import { UpdateInternshipDto } from './dto/update-internship.dto';
 import { ResponseInternshipDto } from './dto/response-intership.dto';
 import { CategoryService } from 'src/category/category.service';
 import { ResponseCategoryDto } from '../category/dto/response.dto';
+import { TagService } from 'src/tag/tag.service';
+import { CreateInternshipInput } from './dto/create-internship.input';
+import { UpdateInternshipInput } from './dto/update-internship.input';
 
 @Controller('internship')
 export class InternshipController {
   constructor(
     private readonly internshipService: InternshipService,
     private readonly categoryService: CategoryService,
+    private readonly tagService: TagService,
   ) { }
 
   @Get()
@@ -59,13 +63,17 @@ export class InternshipController {
   @Get('add')
   async showAddForm(@Res() res: Response, @Req() req: Request) {
     const user = req.session['user'];
-    const categories = await this.categoryService.findAll();
+    const [categories, tags] = await Promise.all([
+      this.categoryService.findAll(),
+      this.tagService.findAll(),
+    ]);
     const menu = categories.map(
       (category) => new ResponseCategoryDto(category, ''),
     );
 
     return res.render('pages/internship-add', {
       menu,
+      tags,
       user,
     });
   }
@@ -85,17 +93,26 @@ export class InternshipController {
     }),
   )
   async create(
-    @Body() createInternshipDto: CreateInternshipDto,
+    @Body() formDto: CreateInternshipDto,
     @UploadedFile() file: Express.Multer.File,
     @Res() res: Response,
   ) {
-    if (file) {
-      createInternshipDto.imgUrl = `/img/${file.filename}`;
-    }
+    const imgUrl = file ? `/img/${file.filename}` : '';
 
-    createInternshipDto.closed = (createInternshipDto.closed as any) === 'true';
+    const input: CreateInternshipInput = {
+      name: formDto.name,
+      companyUrl: formDto.companyUrl,
+      date: formDto.date ?? '',
+      closed: formDto.closed === 'true',
+      categoryName: formDto.category,
+      tags: (formDto.tags ?? '')
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean),
+      imgUrl,
+    };
 
-    const internship = await this.internshipService.create(createInternshipDto);
+    const internship = await this.internshipService.create(input);
     return res.redirect(`/internship?category=${internship.category.name}`);
   }
 
@@ -124,16 +141,17 @@ export class InternshipController {
   async showEditForm(@Param('uuid') uuid: string, @Res() res: Response, @Req() req: Request) {
     const user = req.session['user'];
     try {
-      const [categories, internship] = await Promise.all([
+      const [categories, internship, tags] = await Promise.all([
         this.categoryService.findAll(),
         this.internshipService.findOne(uuid),
+        this.tagService.findAll(),
       ]);
 
       const menu = categories.map(
         (category) => new ResponseCategoryDto(category, ''),
       );
 
-      return res.render('pages/internship-edit', { internship, menu, user });
+      return res.render('pages/internship-edit', { internship, menu, tags, user });
     } catch {
       return res
         .status(404)
@@ -157,22 +175,26 @@ export class InternshipController {
   )
   async update(
     @Param('uuid') uuid: string,
-    @Body() updateInternshipDto: UpdateInternshipDto,
+    @Body() formDto: UpdateInternshipDto,
     @UploadedFile() file: Express.Multer.File,
     @Res() res: Response,
   ) {
-    if (file) {
-      updateInternshipDto.imgUrl = `/img/${file.filename}`;
-    }
+    const imgUrl = file ? `/img/${file.filename}` : undefined;
 
-    updateInternshipDto.closed = (updateInternshipDto.closed as any) === 'true';
+    const input: UpdateInternshipInput = {
+      name: formDto.name,
+      companyUrl: formDto.companyUrl,
+      date: formDto.date,
+      closed: formDto.closed === 'true',
+      categoryName: formDto.category,
+      tags: formDto.tags !== undefined
+        ? formDto.tags.split(',').map((t) => t.trim()).filter(Boolean)
+        : undefined,
+      imgUrl,
+    };
 
-    delete (updateInternshipDto as any)._method;
-    delete (updateInternshipDto as any).imageFile;
-
-    const category = updateInternshipDto.category;
-    await this.internshipService.update(uuid, updateInternshipDto);
-    return res.redirect(`/internship?category=${category}`);
+    await this.internshipService.update(uuid, input);
+    return res.redirect(`/internship?category=${input.categoryName || 'all'}`);
   }
 
   @Delete(':uuid')
