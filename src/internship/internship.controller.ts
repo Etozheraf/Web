@@ -11,10 +11,14 @@ import {
   UseInterceptors,
   UploadedFile,
   Req,
+  Sse,
+  MessageEvent,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response, Request } from 'express';
 import { diskStorage } from 'multer';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { InternshipService } from './internship.service';
 import { CreateInternshipDto } from './dto/create-internship.dto';
 import { UpdateInternshipDto } from './dto/update-internship.dto';
@@ -202,5 +206,18 @@ export class InternshipController {
     const internship = await this.internshipService.findOne(uuid);
     await this.internshipService.remove(uuid);
     return res.redirect(`/internship?category=${internship.category.name}`);
+  }
+
+  @Sse('sse')
+  internshipEvents(): Observable<MessageEvent> {
+    return this.internshipService.getEventsStream().pipe(
+      map((event) => {
+        return {
+          data: JSON.stringify(event.internship),
+          type: event.type,
+          id: event.type, // добавляем id для идентификации типа события
+        } as MessageEvent;
+      })
+    );
   }
 }

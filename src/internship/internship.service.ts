@@ -6,17 +6,26 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInternshipInput } from './dto/create-internship.input';
 import { UpdateInternshipInput } from './dto/update-internship.input';
+import { Internship } from './entities/internship.entity';
 import { Prisma } from '@prisma/client';
 import { CategoryService } from '../category/category.service';
 import { TagService } from '../tag/tag.service';
+import { Observable, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Injectable()
 export class InternshipService {
+  private eventsSubject = new Subject<{ type: string; internship: Internship }>();
+
   constructor(
     private prisma: PrismaService,
     private categoryService: CategoryService,
     private tagService: TagService,
   ) {}
+
+  getEventsStream(): Observable<{ type: string; internship: Internship }> {
+    return this.eventsSubject.asObservable();
+  }
 
   async create(input: CreateInternshipInput) {
     if (!input.categoryName) {
@@ -39,6 +48,7 @@ export class InternshipService {
 
     let {
       tags: tagNames,
+      categoryName,
       ...internshipData
     } = input;
 
@@ -50,7 +60,7 @@ export class InternshipService {
       tagNames.map((tagName) => this.tagService.findOrCreate(tagName)),
     );
 
-    return this.prisma.internship.create({
+    const internship = await this.prisma.internship.create({
       data: {
         ...internshipData,
         date: internshipData.date,
@@ -67,6 +77,10 @@ export class InternshipService {
         tags: true,
       },
     });
+
+    this.eventsSubject.next({ type: 'created', internship });
+
+    return internship;
   }
 
   async findOne(uuid: string) {
@@ -86,6 +100,9 @@ export class InternshipService {
   }
 
   async findByCategory(categoryName: string) {
+    if (!categoryName) {
+      throw new ConflictException('Category is required for finding internships');
+    }
     const category = await this.prisma.category.findUnique({
       where: { name: categoryName },
       select: { uuid: true },
@@ -150,6 +167,9 @@ export class InternshipService {
   async update(uuid: string, input: UpdateInternshipInput) {
     const currentInternship = await this.prisma.internship.findUnique({
       where: { uuid },
+      include: {
+        category: true,
+      },
     });
 
     if (!currentInternship) {
@@ -188,7 +208,7 @@ export class InternshipService {
       };
     }
 
-    return this.prisma.internship.update({
+    const updatedInternship = await this.prisma.internship.update({
       where: { uuid },
       data: dataToUpdate,
       include: {
@@ -196,16 +216,26 @@ export class InternshipService {
         tags: true,
       },
     });
+
+    this.eventsSubject.next({ type: 'updated', internship: updatedInternship });
+
+    return updatedInternship;
   }
 
   async remove(uuid: string) {
     const internship = await this.prisma.internship.findUnique({
       where: { uuid },
+      include: {
+        category: true,
+        tags: true,
+      },
     });
     if (!internship) {
       throw new NotFoundException(`Internship with uuid ${uuid} not found`);
     }
 
     await this.prisma.internship.delete({ where: { uuid } });
+
+    this.eventsSubject.next({ type: 'deleted', internship });
   }
 }
