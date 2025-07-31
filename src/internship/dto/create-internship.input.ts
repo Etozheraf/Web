@@ -1,9 +1,9 @@
 export class CreateInternshipInput {
   name: string;
-  companyUrl: string;
-  date: string;
-  closed: boolean;
   categoryName: string;
+  date: string;
+  companyUrl: string;
+  closed: boolean;
   tags: string[];
   imgUrl: string;
 } 

@@ -8,6 +8,7 @@ import {
   Delete,
   Res,
   Req,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { TagService } from './tag.service';
@@ -64,7 +65,7 @@ export class TagController {
 
   @Get('detail/:uuid')
   async findOne(
-    @Param('uuid') uuid: string,
+    @Param('uuid', ParseUUIDPipe) uuid: string,
     @Res() res: Response,
     @Req() req: Request,
   ) {
@@ -89,7 +90,7 @@ export class TagController {
 
   @Get('edit/:uuid')
   async showEditForm(
-    @Param('uuid') uuid: string,
+    @Param('uuid', ParseUUIDPipe) uuid: string,
     @Res() res: Response,
     @Req() req: Request,
   ) {
@@ -114,7 +115,7 @@ export class TagController {
 
   @Patch(':uuid')
   async update(
-    @Param('uuid') uuid: string,
+    @Param('uuid', ParseUUIDPipe) uuid: string,
     @Body() updateTagDto: UpdateTagDto,
     @Res() res: Response,
   ) {
@@ -123,7 +124,7 @@ export class TagController {
   }
 
   @Delete(':uuid')
-  async remove(@Param('uuid') uuid: string, @Res() res: Response) {
+  async remove(@Param('uuid', ParseUUIDPipe) uuid: string, @Res() res: Response) {
     await this.tagService.remove(uuid);
     return res.redirect('/tag');
   }

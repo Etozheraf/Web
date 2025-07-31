@@ -8,7 +8,7 @@ import {
   Render,
   Res,
   Req,
-  Query,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { RequestService } from './request.service';
@@ -84,7 +84,7 @@ export class RequestController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string, @Res() res: Response) {
+  async remove(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
     await this.requestService.remove(id);
     return res.redirect('/requests');
   }

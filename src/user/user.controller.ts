@@ -9,6 +9,7 @@ import {
   Render,
   Res,
   Req,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -57,7 +58,7 @@ export class UserController {
   }
 
   @Get('api/:id')
-  async findOneApi(@Param('id') id: string) {
+  async findOneApi(@Param('id', ParseUUIDPipe) id: string) {
     const user = await this.userService.findOne(id);
     const { password, ...userWithoutPassword } = user;
     return userWithoutPassword;
@@ -65,7 +66,7 @@ export class UserController {
 
   @Get(':id')
   @Render('pages/user')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     const [categories, user] = await Promise.all([
       this.categoryService.findAll(),
       this.userService.findOne(id),
@@ -82,7 +83,7 @@ export class UserController {
   }
 
   @Get('edit/:id')
-  async showEditForm(@Param('id') id: string, @Res() res: Response) {
+  async showEditForm(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
     try {
       const [categories, userToEdit] = await Promise.all([
         this.categoryService.findAll(),
@@ -102,7 +103,7 @@ export class UserController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Res() res: Response) {
+  async update(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto, @Res() res: Response) {
     try {
       if (!updateUserDto.currentPassword) {
         return res.status(400).render('pages/error', { message: 'Необходимо ввести текущий пароль' });
@@ -129,7 +130,7 @@ export class UserController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string, @Res() res: Response, @Req() req: Request) {
+  async remove(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response, @Req() req: Request) {
     await this.userService.remove(id);
     req.session.destroy((err) => {
       if (err) {

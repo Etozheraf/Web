@@ -13,6 +13,7 @@ import {
   Req,
   Sse,
   MessageEvent,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response, Request } from 'express';
@@ -107,7 +108,7 @@ export class InternshipController {
       name: formDto.name,
       companyUrl: formDto.companyUrl,
       date: formDto.date ?? '',
-      closed: formDto.closed === 'true',
+      closed: formDto.closed,
       categoryName: formDto.category,
       tags: (formDto.tags ?? '')
         .split(',')
@@ -121,7 +122,7 @@ export class InternshipController {
   }
 
   @Get('detail/:uuid')
-  async findOne(@Param('uuid') uuid: string, @Res() res: Response, @Req() req: Request) {
+  async findOne(@Param('uuid', ParseUUIDPipe) uuid: string, @Res() res: Response, @Req() req: Request) {
     const user = req.session['user'];
     try {
       const [categories, internship] = await Promise.all([
@@ -142,7 +143,7 @@ export class InternshipController {
   }
 
   @Get('edit/:uuid')
-  async showEditForm(@Param('uuid') uuid: string, @Res() res: Response, @Req() req: Request) {
+  async showEditForm(@Param('uuid', ParseUUIDPipe) uuid: string, @Res() res: Response, @Req() req: Request) {
     const user = req.session['user'];
     try {
       const [categories, internship, tags] = await Promise.all([
@@ -178,7 +179,7 @@ export class InternshipController {
     }),
   )
   async update(
-    @Param('uuid') uuid: string,
+    @Param('uuid', ParseUUIDPipe) uuid: string,
     @Body() formDto: UpdateInternshipDto,
     @UploadedFile() file: Express.Multer.File,
     @Res() res: Response,
@@ -189,7 +190,7 @@ export class InternshipController {
       name: formDto.name,
       companyUrl: formDto.companyUrl,
       date: formDto.date,
-      closed: formDto.closed === 'true',
+      closed: formDto.closed,
       categoryName: formDto.category,
       tags: formDto.tags !== undefined
         ? formDto.tags.split(',').map((t) => t.trim()).filter(Boolean)
@@ -202,7 +203,7 @@ export class InternshipController {
   }
 
   @Delete(':uuid')
-  async remove(@Param('uuid') uuid: string, @Res() res: Response) {
+  async remove(@Param('uuid', ParseUUIDPipe) uuid: string, @Res() res: Response) {
     const internship = await this.internshipService.findOne(uuid);
     await this.internshipService.remove(uuid);
     return res.redirect(`/internship?category=${internship.category.name}`);

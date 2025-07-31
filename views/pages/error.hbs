@@ -1,0 +1,18 @@
+{{#section 'styles'}}
+  <link rel="stylesheet" href="/blocks/error/error.css">
+  <link rel="stylesheet" href="/blocks/error/error__code.css">
+  <link rel="stylesheet" href="/blocks/error/error__message.css">
+  <link rel="stylesheet" href="/blocks/error/error__buttons.css">
+  <link rel="stylesheet" href="/blocks/error/error__button.css">
+{{/section}}
+
+<main class="main">
+  <div class="error">
+    <div class="error__code">{{#if statusCode}}{{statusCode}}{{else}}500{{/if}}</div>
+    <div class="error__message">{{#if message}}{{message}}{{else}}Что-то пошло не так{{/if}}</div>
+    <div class="error__buttons">
+      <a href="/" class="error__button">На главную</a>
+      <button onclick="history.back()" class="error__button error__button_secondary">Назад</button>
+    </div>
+  </div>
+</main>

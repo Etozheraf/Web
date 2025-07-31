@@ -8,6 +8,7 @@ import {
   Delete,
   Res,
   Req,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { CategoryService } from './category.service';
@@ -58,7 +59,7 @@ export class CategoryController {
   }
 
   @Get('detail/:uuid')
-  async findOne(@Param('uuid') uuid: string, @Res() res: Response, @Req() req: Request) {
+  async findOne(@Param('uuid', ParseUUIDPipe) uuid: string, @Res() res: Response, @Req() req: Request) {
     const user = req.session['user'];
     try {
       const [rawCategories, category] = await Promise.all([
@@ -79,7 +80,7 @@ export class CategoryController {
   }
 
   @Get('edit/:uuid')
-  async showEditForm(@Param('uuid') uuid: string, @Res() res: Response, @Req() req: Request) {
+  async showEditForm(@Param('uuid', ParseUUIDPipe) uuid: string, @Res() res: Response, @Req() req: Request) {
     const user = req.session['user'];
     try {
       const [rawCategories, category] = await Promise.all([
@@ -101,7 +102,7 @@ export class CategoryController {
 
   @Patch(':uuid')
   async update(
-    @Param('uuid') uuid: string,
+    @Param('uuid', ParseUUIDPipe) uuid: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
     @Res() res: Response,
   ) {
@@ -110,7 +111,7 @@ export class CategoryController {
   }
 
   @Delete(':uuid')
-  async remove(@Param('uuid') uuid: string, @Res() res: Response) {
+  async remove(@Param('uuid', ParseUUIDPipe) uuid: string, @Res() res: Response) {
     await this.categoryService.remove(uuid);
     return res.redirect('/category');
   }

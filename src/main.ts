@@ -2,15 +2,27 @@ import { join } from 'path';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import * as fs from 'fs';
 import * as hbs from 'hbs';
-import { section } from './hbs.helpers';
+import { section } from './common/helpers/hbs.helpers';
 import * as methodOverride from 'method-override';
 import * as express from 'express';
 import * as session from 'express-session';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  
+  app.useGlobalPipes(
+    new ValidationPipe({
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+
+  app.useGlobalFilters(new GlobalExceptionFilter());
+  
   app.useStaticAssets(join(__dirname, '..', 'public'));
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('hbs');
