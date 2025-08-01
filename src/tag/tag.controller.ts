@@ -17,7 +17,9 @@ import { UpdateTagDto } from './dto/update-tag.dto';
 import { ResponseTagDto } from './dto/response.dto';
 import { CategoryService } from '../category/category.service';
 import { ResponseCategoryDto } from '../category/dto/response.dto';
+import { ApiExcludeController } from '@nestjs/swagger';
 
+@ApiExcludeController()
 @Controller('tag')
 export class TagController {
   constructor(

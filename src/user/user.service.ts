@@ -33,7 +33,7 @@ export class UserService {
   async login(loginDto: LoginDto) {
     const user = await this.findByEmail(loginDto.email);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     const isPasswordMatching = await bcrypt.compare(
@@ -72,7 +72,6 @@ export class UserService {
   async update(uuid: string, updateUserDto: UpdateUserDto) {
     const updateData = { ...updateUserDto };
     
-    // Если передан новый пароль, хешируем его
     if (updateData.password) {
       const salt = await bcrypt.genSalt();
       updateData.password = await bcrypt.hash(updateData.password, salt);

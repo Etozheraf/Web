@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -28,9 +29,6 @@ export class InternshipService {
   }
 
   async create(input: CreateInternshipInput) {
-    if (!input.categoryName) {
-      throw new ConflictException('Category is required for creating an internship');
-    }
     const category = await this.categoryService.findOrCreate(input.categoryName);
     
     const existingInternship = await this.prisma.internship.findUnique({
@@ -43,7 +41,7 @@ export class InternshipService {
       select: { uuid: true },
     });
     if (existingInternship) {
-      throw new ConflictException('Internship with this name already exists');
+      throw new ConflictException('Internship already exists');
     }
 
     let {
@@ -101,7 +99,7 @@ export class InternshipService {
 
   async findByCategory(categoryName: string) {
     if (!categoryName) {
-      throw new ConflictException('Category is required for finding internships');
+      throw new BadRequestException('Category is required for finding internships');
     }
     const category = await this.prisma.category.findUnique({
       where: { name: categoryName },

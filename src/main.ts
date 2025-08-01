@@ -10,10 +10,24 @@ import { section } from './common/helpers/hbs.helpers';
 import * as methodOverride from 'method-override';
 import * as express from 'express';
 import * as session from 'express-session';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  
+
+  const config = new DocumentBuilder()
+    .setTitle('Internships aggregator API')
+    .setDescription('The internships aggregator API description')
+    .setVersion('1.0')
+    .addTag('internships')
+    .addTag('requests')
+    .addTag('users')
+    .addTag('categories')
+    .addTag('tags')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
+
   app.useGlobalPipes(
     new ValidationPipe({
       forbidNonWhitelisted: true,
@@ -22,7 +36,7 @@ async function bootstrap() {
   );
 
   app.useGlobalFilters(new GlobalExceptionFilter());
-  
+
   app.useStaticAssets(join(__dirname, '..', 'public'));
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('hbs');

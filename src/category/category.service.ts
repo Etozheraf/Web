@@ -8,8 +8,11 @@ export class CategoryService {
   constructor(private prisma: PrismaService) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
-    if (!createCategoryDto.name) {
-      throw new ConflictException('Category name is required');
+    const existingCategory = await this.prisma.category.findUnique({
+      where: { name: createCategoryDto.name },
+    });
+    if (existingCategory) {
+      throw new ConflictException('Category already exists');
     }
     return this.prisma.category.create({
       data: createCategoryDto,
@@ -50,7 +53,7 @@ export class CategoryService {
   }
 
   async update(uuid: string, updateCategoryDto: UpdateCategoryDto) {
-    const category = await this.findOne(uuid);
+    await this.findOne(uuid);
     
     return this.prisma.category.update({
       where: { uuid },
@@ -59,12 +62,7 @@ export class CategoryService {
   }
 
   async remove(uuid: string) {
-    const category = await this.prisma.category.findUnique({
-      where: { uuid },
-    });
-    if (!category) {
-      throw new NotFoundException(`Category with uuid ${uuid} not found`);
-    }
+    await this.findOne(uuid);
     
     return this.prisma.category.delete({
       where: { uuid },

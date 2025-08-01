@@ -16,7 +16,9 @@ import { CreateRequestDto } from './dto/create-request.dto';
 import { InternshipService } from '../internship/internship.service';
 import { CategoryService } from '../category/category.service';
 import { ResponseCategoryDto } from '../category/dto/response.dto';
+import { ApiExcludeController } from '@nestjs/swagger';
 
+@ApiExcludeController()
 @Controller('requests')
 export class RequestController {
   constructor(

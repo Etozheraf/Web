@@ -18,7 +18,9 @@ import { Request, Response } from 'express';
 import { LoginDto } from './dto/login.dto';
 import { CategoryService } from 'src/category/category.service';
 import { ResponseCategoryDto } from '../category/dto/response.dto';
+import { ApiExcludeController } from '@nestjs/swagger';
 
+@ApiExcludeController()
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService,

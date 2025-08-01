@@ -8,8 +8,11 @@ export class TagService {
   constructor(private prisma: PrismaService) {}
 
   async create(createTagDto: CreateTagDto) {
-    if (!createTagDto.name) {
-      throw new ConflictException('Tag name is required');
+    const existingTag = await this.prisma.tag.findUnique({
+      where: { name: createTagDto.name },
+    });
+    if (existingTag) {
+      throw new ConflictException('Tag already exists');
     }
     return this.prisma.tag.create({
       data: createTagDto,
@@ -50,7 +53,7 @@ export class TagService {
   }
 
   async update(uuid: string, updateTagDto: UpdateTagDto) {
-    const tag = await this.findOne(uuid);
+    await this.findOne(uuid);
     
     return this.prisma.tag.update({
       where: { uuid },

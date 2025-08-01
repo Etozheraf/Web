@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateRequestDto } from './dto/create-request.dto';
 
@@ -25,6 +25,16 @@ export class RequestService {
     return request;
   }
 
+  async findOne(uuid: string) {
+    const request = await this.prisma.request.findUnique({
+      where: { uuid },
+    });
+    if (!request) {
+      throw new NotFoundException('Request not found');
+    }
+    return request;
+  }
+
   async findByUser(userUuid: string) {
     return this.prisma.request.findMany({
       where: { userUuid },
@@ -39,6 +49,7 @@ export class RequestService {
   }
 
   async remove(uuid: string) {
+    await this.findOne(uuid);
     return this.prisma.request.delete({
       where: { uuid },
     });

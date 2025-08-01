@@ -29,7 +29,9 @@ import { ResponseCategoryDto } from '../category/dto/response.dto';
 import { TagService } from 'src/tag/tag.service';
 import { CreateInternshipInput } from './dto/create-internship.input';
 import { UpdateInternshipInput } from './dto/update-internship.input';
+import { ApiExcludeController } from '@nestjs/swagger';
 
+@ApiExcludeController()
 @Controller('internship')
 export class InternshipController {
   constructor(
