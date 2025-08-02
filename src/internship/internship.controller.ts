@@ -14,6 +14,7 @@ import {
   Sse,
   MessageEvent,
   ParseUUIDPipe,
+  Render,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response, Request } from 'express';
@@ -38,12 +39,12 @@ export class InternshipController {
     private readonly internshipService: InternshipService,
     private readonly categoryService: CategoryService,
     private readonly tagService: TagService,
-  ) { }
+  ) {}
 
   @Get()
+  @Render('pages/internships')
   async findByCategory(
     @Query('category') categoryName: string,
-    @Res() res: Response,
     @Req() req: Request,
   ) {
     const user = req.session['user'];
@@ -60,15 +61,16 @@ export class InternshipController {
       (category) => new ResponseCategoryDto(category, categoryName),
     );
 
-    return res.render('pages/internships', {
+    return {
       internships,
       menu,
       user,
-    });
+    };
   }
 
   @Get('add')
-  async showAddForm(@Res() res: Response, @Req() req: Request) {
+  @Render('pages/internship-add')
+  async showAddForm(@Req() req: Request) {
     const user = req.session['user'];
     const [categories, tags] = await Promise.all([
       this.categoryService.findAll(),
@@ -78,11 +80,11 @@ export class InternshipController {
       (category) => new ResponseCategoryDto(category, ''),
     );
 
-    return res.render('pages/internship-add', {
+    return {
       menu,
       tags,
       user,
-    });
+    };
   }
 
   @Post('')
@@ -124,46 +126,47 @@ export class InternshipController {
   }
 
   @Get('detail/:uuid')
-  async findOne(@Param('uuid', ParseUUIDPipe) uuid: string, @Res() res: Response, @Req() req: Request) {
+  @Render('pages/internship-detail')
+  async findOne(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @Req() req: Request,
+  ) {
     const user = req.session['user'];
-    try {
-      const [categories, internship] = await Promise.all([
-        this.categoryService.findAll(),
-        this.internshipService.findOne(uuid),
-      ]);
+    const [categories, internship] = await Promise.all([
+      this.categoryService.findAll(),
+      this.internshipService.findOne(uuid),
+    ]);
 
-      const menu = categories.map(
-        (category) => new ResponseCategoryDto(category, ''),
-      );
+    const menu = categories.map(
+      (category) => new ResponseCategoryDto(category, ''),
+    );
 
-      return res.render('pages/internship-detail', { internship, menu, user });
-    } catch {
-      return res
-        .status(404)
-        .render('pages/error', { message: 'Internship not found' });
-    }
+    return { internship, menu, user };
   }
 
   @Get('edit/:uuid')
-  async showEditForm(@Param('uuid', ParseUUIDPipe) uuid: string, @Res() res: Response, @Req() req: Request) {
+  @Render('pages/internship-edit')
+  async showEditForm(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @Req() req: Request,
+  ) {
     const user = req.session['user'];
-    try {
-      const [categories, internship, tags] = await Promise.all([
-        this.categoryService.findAll(),
-        this.internshipService.findOne(uuid),
-        this.tagService.findAll(),
-      ]);
+    const [categories, internship, tags] = await Promise.all([
+      this.categoryService.findAll(),
+      this.internshipService.findOne(uuid),
+      this.tagService.findAll(),
+    ]);
 
-      const menu = categories.map(
-        (category) => new ResponseCategoryDto(category, ''),
-      );
+    const menu = categories.map(
+      (category) => new ResponseCategoryDto(category, ''),
+    );
 
-      return res.render('pages/internship-edit', { internship, menu, tags, user });
-    } catch {
-      return res
-        .status(404)
-        .render('pages/error', { message: 'Internship not found' });
-    }
+    return {
+      internship,
+      menu,
+      tags,
+      user,
+    };
   }
 
   @Patch(':uuid')
@@ -194,9 +197,13 @@ export class InternshipController {
       date: formDto.date,
       closed: formDto.closed,
       categoryName: formDto.category,
-      tags: formDto.tags !== undefined
-        ? formDto.tags.split(',').map((t) => t.trim()).filter(Boolean)
-        : undefined,
+      tags:
+        formDto.tags !== undefined
+          ? formDto.tags
+              .split(',')
+              .map((t) => t.trim())
+              .filter(Boolean)
+          : undefined,
       imgUrl,
     };
 
@@ -205,7 +212,10 @@ export class InternshipController {
   }
 
   @Delete(':uuid')
-  async remove(@Param('uuid', ParseUUIDPipe) uuid: string, @Res() res: Response) {
+  async remove(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @Res() res: Response,
+  ) {
     const internship = await this.internshipService.findOne(uuid);
     await this.internshipService.remove(uuid);
     return res.redirect(`/internship?category=${internship.category.name}`);
@@ -218,9 +228,9 @@ export class InternshipController {
         return {
           data: JSON.stringify(event.internship),
           type: event.type,
-          id: event.type, 
+          id: event.type,
         } as MessageEvent;
-      })
+      }),
     );
   }
 }

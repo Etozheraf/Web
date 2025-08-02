@@ -10,4 +10,4 @@ export class ResponseTagDto {
     this.active = tag.name === tagName;
     this.label = tag.name;
   }
-} 
+}

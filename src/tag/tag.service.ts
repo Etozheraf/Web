@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
@@ -44,17 +48,17 @@ export class TagService {
     const tag = await this.prisma.tag.findUnique({
       where: { uuid },
     });
-    
+
     if (!tag) {
       throw new NotFoundException(`Tag with uuid ${uuid} not found`);
     }
-    
+
     return tag;
   }
 
   async update(uuid: string, updateTagDto: UpdateTagDto) {
     await this.findOne(uuid);
-    
+
     return this.prisma.tag.update({
       where: { uuid },
       data: updateTagDto,
@@ -63,7 +67,7 @@ export class TagService {
 
   async remove(uuid: string) {
     const tag = await this.findOne(uuid);
-    
+
     return this.prisma.tag.delete({
       where: { uuid },
     });

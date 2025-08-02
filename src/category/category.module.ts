@@ -10,4 +10,4 @@ import { CategoryGraphQLResolver } from './category-graphql.resolver';
   providers: [CategoryService, CategoryGraphQLResolver],
   exports: [CategoryService],
 })
-export class CategoryModule { }
+export class CategoryModule {}

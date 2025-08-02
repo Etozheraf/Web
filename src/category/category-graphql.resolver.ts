@@ -7,40 +7,41 @@ import { CreateCategoryInput } from './dto/create-category.input';
 export class CategoryGraphQLResolver {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @Query(() => [CategoryObject], { 
+  @Query(() => [CategoryObject], {
     name: 'categories',
-    description: 'Получить список всех категорий' 
+    description: 'Получить список всех категорий',
   })
   async findAllCategories(): Promise<CategoryObject[]> {
     return this.categoryService.findAll();
   }
 
-  @Query(() => CategoryObject, { 
+  @Query(() => CategoryObject, {
     name: 'category',
-    description: 'Получить категорию по ID' 
+    description: 'Получить категорию по ID',
   })
   async findOneCategory(
-    @Args('id', { type: () => ID, description: 'ID категории' }) id: string
+    @Args('id', { type: () => ID, description: 'ID категории' }) id: string,
   ): Promise<CategoryObject> {
     return this.categoryService.findOne(id);
   }
 
-  @Mutation(() => CategoryObject, { 
+  @Mutation(() => CategoryObject, {
     name: 'createCategory',
-    description: 'Создать новую категорию' 
+    description: 'Создать новую категорию',
   })
   async createCategory(
-    @Args('createCategoryInput', { type: () => CreateCategoryInput }) createCategoryInput: CreateCategoryInput
+    @Args('createCategoryInput', { type: () => CreateCategoryInput })
+    createCategoryInput: CreateCategoryInput,
   ): Promise<CategoryObject> {
     return this.categoryService.create(createCategoryInput);
   }
 
-  @Mutation(() => Boolean, { 
+  @Mutation(() => Boolean, {
     name: 'removeCategory',
-    description: 'Удалить категорию' 
+    description: 'Удалить категорию',
   })
   async removeCategory(
-    @Args('id', { type: () => ID, description: 'ID категории' }) id: string
+    @Args('id', { type: () => ID, description: 'ID категории' }) id: string,
   ): Promise<boolean> {
     await this.categoryService.remove(id);
     return true;

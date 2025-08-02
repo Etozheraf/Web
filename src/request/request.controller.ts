@@ -25,7 +25,7 @@ export class RequestController {
     private readonly requestService: RequestService,
     private readonly internshipService: InternshipService,
     private readonly categoryService: CategoryService,
-  ) { }
+  ) {}
 
   @Get()
   @Render('pages/form')
@@ -59,23 +59,31 @@ export class RequestController {
   ) {
     const user = req.session['user'];
     if (!user) {
-      return res.status(401).render('pages/error', { message: 'Необходимо авторизоваться' });
+      return res
+        .status(401)
+        .render('pages/error', { message: 'Необходимо авторизоваться' });
     }
 
     if (!createRequestDto.internshipName) {
-      return res.status(400).render('pages/error', { message: 'Необходимо указать название стажировки' });
+      return res.status(400).render('pages/error', {
+        message: 'Необходимо указать название стажировки',
+      });
     }
 
     if (!createRequestDto.category) {
-      return res.status(400).render('pages/error', { message: 'Необходимо выбрать категорию' });
+      return res
+        .status(400)
+        .render('pages/error', { message: 'Необходимо выбрать категорию' });
     }
-    
+
     const internship = await this.internshipService.findByNameAndCategory(
-      createRequestDto.internshipName, 
-      createRequestDto.category
+      createRequestDto.internshipName,
+      createRequestDto.category,
     );
     if (!internship) {
-      return res.status(404).render('pages/error', { message: 'Стажировка не найдена в указанной категории' });
+      return res.status(404).render('pages/error', {
+        message: 'Стажировка не найдена в указанной категории',
+      });
     }
 
     createRequestDto.userUuid = user.uuid;

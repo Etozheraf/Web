@@ -3,15 +3,15 @@ import { IsOptional, IsString, IsBoolean, IsUrl } from 'class-validator';
 export class UpdateInternshipDto {
   @IsOptional()
   @IsString()
-  name?: string;           
+  name?: string;
 
   @IsOptional()
   @IsString()
-  category?: string;       
+  category?: string;
 
   @IsOptional()
   @IsString()
-  date?: string;          
+  date?: string;
 
   @IsOptional()
   @IsUrl()

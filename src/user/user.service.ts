@@ -44,12 +44,15 @@ export class UserService {
     if (!isPasswordMatching) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    
+
     const { password, ...result } = user;
     return result;
   }
 
-  async validatePassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
+  async validatePassword(
+    plainPassword: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
     return bcrypt.compare(plainPassword, hashedPassword);
   }
 
@@ -71,7 +74,7 @@ export class UserService {
 
   async update(uuid: string, updateUserDto: UpdateUserDto) {
     const updateData = { ...updateUserDto };
-    
+
     if (updateData.password) {
       const salt = await bcrypt.genSalt();
       updateData.password = await bcrypt.hash(updateData.password, salt);

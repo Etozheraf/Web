@@ -1,8 +1,11 @@
-import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { createComplexityRule, simpleEstimator } from 'graphql-query-complexity';
+import {
+  createComplexityRule,
+  simpleEstimator,
+} from 'graphql-query-complexity';
 import { AppController } from './app.controller';
 import { InternshipModule } from './internship/internship.module';
 import { UserModule } from './user/user.module';
@@ -10,6 +13,7 @@ import { RequestModule } from './request/request.module';
 import { CategoryModule } from './category/category.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { TagModule } from './tag/tag.module';
+import { TimingInterceptor } from './common/interceptors/timing.interceptor';
 
 @Module({
   imports: [
@@ -46,5 +50,11 @@ import { TagModule } from './tag/tag.module';
     TagModule,
   ],
   controllers: [AppController],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TimingInterceptor,
+    },
+  ],
 })
 export class AppModule {}

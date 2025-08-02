@@ -8,87 +8,90 @@ import { UpdateInternshipInput } from './dto/update-internship.input.graphql';
 export class InternshipGraphQLResolver {
   constructor(private readonly internshipService: InternshipService) {}
 
-  @Query(() => [InternshipObject], { 
+  @Query(() => [InternshipObject], {
     name: 'internshipsByCategory',
-    description: 'Получить список стажировок по категории' 
+    description: 'Получить список стажировок по категории',
   })
   async findInternshipsByCategory(
-    @Args('categoryName', { description: 'Название категории' }) categoryName: string
+    @Args('categoryName', { description: 'Название категории' })
+    categoryName: string,
   ): Promise<InternshipObject[]> {
     return this.internshipService.findByCategory(categoryName);
   }
 
-  @Query(() => InternshipObject, { 
+  @Query(() => InternshipObject, {
     name: 'internship',
-    description: 'Получить стажировку по ID' 
+    description: 'Получить стажировку по ID',
   })
   async findOneInternship(
-    @Args('id', { type: () => ID, description: 'ID стажировки' }) id: string
+    @Args('id', { type: () => ID, description: 'ID стажировки' }) id: string,
   ): Promise<InternshipObject> {
     return this.internshipService.findOne(id);
   }
 
-  @Query(() => InternshipObject, { 
+  @Query(() => InternshipObject, {
     name: 'internshipByNameAndCategory',
-    description: 'Найти стажировку по названию и категории' 
+    description: 'Найти стажировку по названию и категории',
   })
   async findInternshipByNameAndCategory(
     @Args('name', { description: 'Название стажировки' }) name: string,
-    @Args('categoryName', { description: 'Название категории' }) categoryName: string
+    @Args('categoryName', { description: 'Название категории' })
+    categoryName: string,
   ): Promise<InternshipObject | null> {
     return this.internshipService.findByNameAndCategory(name, categoryName);
   }
 
-  @Mutation(() => InternshipObject, { 
+  @Mutation(() => InternshipObject, {
     name: 'createInternship',
-    description: 'Создать новую стажировку' 
+    description: 'Создать новую стажировку',
   })
   async createInternship(
-    @Args('createInternshipInput') createInternshipInput: CreateInternshipInput
+    @Args('createInternshipInput') createInternshipInput: CreateInternshipInput,
   ): Promise<InternshipObject> {
     return this.internshipService.create(createInternshipInput);
   }
 
-  @Mutation(() => InternshipObject, { 
+  @Mutation(() => InternshipObject, {
     name: 'updateInternship',
-    description: 'Обновить стажировку' 
+    description: 'Обновить стажировку',
   })
   async updateInternship(
-    @Args('updateInternshipInput') updateInternshipInput: UpdateInternshipInput
+    @Args('updateInternshipInput') updateInternshipInput: UpdateInternshipInput,
   ): Promise<InternshipObject> {
-    return this.internshipService.update(updateInternshipInput.uuid, updateInternshipInput);
+    return this.internshipService.update(
+      updateInternshipInput.uuid,
+      updateInternshipInput,
+    );
   }
 
-  @Mutation(() => InternshipObject, { 
+  @Mutation(() => InternshipObject, {
     name: 'publishInternship',
-    description: 'Открыть стажировку для подачи заявок' 
+    description: 'Открыть стажировку для подачи заявок',
   })
   async publishInternship(
-    @Args('id', { type: () => ID, description: 'ID стажировки' }) id: string
+    @Args('id', { type: () => ID, description: 'ID стажировки' }) id: string,
   ): Promise<InternshipObject> {
     return this.internshipService.update(id, { closed: false });
   }
 
-  @Mutation(() => InternshipObject, { 
+  @Mutation(() => InternshipObject, {
     name: 'hideInternship',
-    description: 'Закрыть стажировку для подачи заявок' 
+    description: 'Закрыть стажировку для подачи заявок',
   })
   async hideInternship(
-    @Args('id', { type: () => ID, description: 'ID стажировки' }) id: string
+    @Args('id', { type: () => ID, description: 'ID стажировки' }) id: string,
   ): Promise<InternshipObject> {
     return this.internshipService.update(id, { closed: true });
   }
 
-  @Mutation(() => Boolean, { 
+  @Mutation(() => Boolean, {
     name: 'removeInternship',
-    description: 'Удалить стажировку' 
+    description: 'Удалить стажировку',
   })
   async removeInternship(
-    @Args('id', { type: () => ID, description: 'ID стажировки' }) id: string
+    @Args('id', { type: () => ID, description: 'ID стажировки' }) id: string,
   ): Promise<boolean> {
     await this.internshipService.remove(id);
     return true;
   }
-
-  
 }

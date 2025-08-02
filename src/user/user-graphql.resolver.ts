@@ -7,43 +7,43 @@ import { CreateUserInput } from './dto/create-user.input';
 export class UserGraphQLResolver {
   constructor(private readonly userService: UserService) {}
 
-  @Query(() => UserObject, { 
+  @Query(() => UserObject, {
     name: 'userByEmail',
     description: 'Найти пользователя по email',
-    nullable: true
+    nullable: true,
   })
   async findUserByEmail(
-    @Args('email', { description: 'Email пользователя' }) email: string
+    @Args('email', { description: 'Email пользователя' }) email: string,
   ): Promise<UserObject | null> {
     return this.userService.findByEmail(email);
   }
 
-  @Query(() => UserObject, { 
+  @Query(() => UserObject, {
     name: 'user',
-    description: 'Получить пользователя по ID' 
+    description: 'Получить пользователя по ID',
   })
   async findOneUser(
-    @Args('id', { type: () => ID, description: 'ID пользователя' }) id: string
+    @Args('id', { type: () => ID, description: 'ID пользователя' }) id: string,
   ): Promise<UserObject> {
     return this.userService.findOne(id);
   }
 
-  @Mutation(() => UserObject, { 
+  @Mutation(() => UserObject, {
     name: 'registerUser',
-    description: 'Зарегистрировать нового пользователя' 
+    description: 'Зарегистрировать нового пользователя',
   })
   async registerUser(
-    @Args('createUserInput') createUserInput: CreateUserInput
+    @Args('createUserInput') createUserInput: CreateUserInput,
   ): Promise<UserObject> {
     return this.userService.register(createUserInput);
   }
 
-  @Mutation(() => Boolean, { 
+  @Mutation(() => Boolean, {
     name: 'removeUser',
-    description: 'Удалить пользователя' 
+    description: 'Удалить пользователя',
   })
   async removeUser(
-    @Args('id', { type: () => ID, description: 'ID пользователя' }) id: string
+    @Args('id', { type: () => ID, description: 'ID пользователя' }) id: string,
   ): Promise<boolean> {
     await this.userService.remove(id);
     return true;

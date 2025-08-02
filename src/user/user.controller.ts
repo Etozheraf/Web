@@ -85,8 +85,8 @@ export class UserController {
   }
 
   @Get('edit/:id')
-  async showEditForm(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
-    try {
+  @Render('pages/user-edit')
+  async showEditForm(@Param('id', ParseUUIDPipe) id: string) {
       const [categories, userToEdit] = await Promise.all([
         this.categoryService.findAll(),
         this.userService.findOne(id),
@@ -96,12 +96,10 @@ export class UserController {
         (category) => new ResponseCategoryDto(category, ''),
       );
 
-      return res.render('pages/user-edit', { user: userToEdit, menu });
-    } catch {
-      return res
-        .status(404)
-        .render('pages/error', { message: 'User not found' });
-    }
+    return {
+      user: userToEdit,
+      menu,
+    };
   }
 
   @Patch(':id')

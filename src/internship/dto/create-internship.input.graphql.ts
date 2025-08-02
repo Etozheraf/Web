@@ -1,5 +1,11 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsString, IsNotEmpty, IsUrl, IsBoolean, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsUrl,
+  IsBoolean,
+  IsArray,
+} from 'class-validator';
 
 @InputType({ description: 'Данные для создания новой стажировки' })
 export class CreateInternshipInput {

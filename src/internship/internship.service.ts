@@ -16,7 +16,10 @@ import { map } from 'rxjs/operators';
 
 @Injectable()
 export class InternshipService {
-  private eventsSubject = new Subject<{ type: string; internship: Internship }>();
+  private eventsSubject = new Subject<{
+    type: string;
+    internship: Internship;
+  }>();
 
   constructor(
     private prisma: PrismaService,
@@ -29,8 +32,10 @@ export class InternshipService {
   }
 
   async create(input: CreateInternshipInput) {
-    const category = await this.categoryService.findOrCreate(input.categoryName);
-    
+    const category = await this.categoryService.findOrCreate(
+      input.categoryName,
+    );
+
     const existingInternship = await this.prisma.internship.findUnique({
       where: {
         name_categoryUuid: {
@@ -44,11 +49,7 @@ export class InternshipService {
       throw new ConflictException('Internship already exists');
     }
 
-    let {
-      tags: tagNames,
-      categoryName,
-      ...internshipData
-    } = input;
+    let { tags: tagNames, categoryName, ...internshipData } = input;
 
     if (!tagNames) {
       tagNames = [];
@@ -99,7 +100,9 @@ export class InternshipService {
 
   async findByCategory(categoryName: string) {
     if (!categoryName) {
-      throw new BadRequestException('Category is required for finding internships');
+      throw new BadRequestException(
+        'Category is required for finding internships',
+      );
     }
     const category = await this.prisma.category.findUnique({
       where: { name: categoryName },
@@ -138,7 +141,6 @@ export class InternshipService {
     return internships;
   }
 
-
   async findByNameAndCategory(name: string, categoryName: string) {
     const category = await this.prisma.category.findUnique({
       where: { name: categoryName },
@@ -174,13 +176,8 @@ export class InternshipService {
       throw new NotFoundException(`Internship with uuid ${uuid} not found`);
     }
 
-    const {
-      categoryName,
-      tags: rawTags,
-      ...internshipData
-    } = input;
+    const { categoryName, tags: rawTags, ...internshipData } = input;
 
-    
     const dataToUpdate: Prisma.InternshipUpdateInput = {
       ...internshipData,
     };
@@ -199,7 +196,7 @@ export class InternshipService {
         connect: { uuid: category.uuid },
       };
     }
-    
+
     if (rawTags !== undefined) {
       dataToUpdate.tags = {
         set: tags?.map((tag) => ({ uuid: tag.uuid })) ?? [],

@@ -4,6 +4,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import { TimingInterceptor } from './common/interceptors/timing.interceptor';
 import * as fs from 'fs';
 import * as hbs from 'hbs';
 import { section } from './common/helpers/hbs.helpers';
@@ -36,6 +37,8 @@ async function bootstrap() {
   );
 
   app.useGlobalFilters(new GlobalExceptionFilter());
+
+  app.useGlobalInterceptors(new TimingInterceptor());
 
   app.useStaticAssets(join(__dirname, '..', 'public'));
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
@@ -76,10 +79,10 @@ async function bootstrap() {
 
   app.use(
     session({
-      secret: 'test_secret', 
+      secret: 'test_secret',
       resave: false,
       saveUninitialized: false,
-      cookie: { maxAge: 60000 * 60 }, 
+      cookie: { maxAge: 60000 * 60 },
     }),
   );
 

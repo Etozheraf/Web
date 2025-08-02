@@ -7,40 +7,40 @@ import { CreateTagInput } from './dto/create-tag.input';
 export class TagGraphQLResolver {
   constructor(private readonly tagService: TagService) {}
 
-  @Query(() => [TagObject], { 
+  @Query(() => [TagObject], {
     name: 'tags',
-    description: 'Получить список всех тегов' 
+    description: 'Получить список всех тегов',
   })
   async findAllTags(): Promise<TagObject[]> {
     return this.tagService.findAll();
   }
 
-  @Query(() => TagObject, { 
+  @Query(() => TagObject, {
     name: 'tag',
-    description: 'Получить тег по ID' 
+    description: 'Получить тег по ID',
   })
   async findOneTag(
-    @Args('id', { type: () => ID, description: 'ID тега' }) id: string
+    @Args('id', { type: () => ID, description: 'ID тега' }) id: string,
   ): Promise<TagObject> {
     return this.tagService.findOne(id);
   }
 
-  @Mutation(() => TagObject, { 
+  @Mutation(() => TagObject, {
     name: 'createTag',
-    description: 'Создать новый тег' 
+    description: 'Создать новый тег',
   })
   async createTag(
-    @Args('createTagInput') createTagInput: CreateTagInput
+    @Args('createTagInput') createTagInput: CreateTagInput,
   ): Promise<TagObject> {
     return this.tagService.create(createTagInput);
   }
 
-  @Mutation(() => Boolean, { 
+  @Mutation(() => Boolean, {
     name: 'removeTag',
-    description: 'Удалить тег' 
+    description: 'Удалить тег',
   })
   async removeTag(
-    @Args('id', { type: () => ID, description: 'ID тега' }) id: string
+    @Args('id', { type: () => ID, description: 'ID тега' }) id: string,
   ): Promise<boolean> {
     await this.tagService.remove(id);
     return true;

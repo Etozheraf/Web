@@ -1,17 +1,23 @@
-import { IsNotEmpty, IsString, IsBoolean, IsOptional, IsUrl } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsBoolean,
+  IsOptional,
+  IsUrl,
+} from 'class-validator';
 
 export class CreateInternshipDto {
   @IsNotEmpty()
   @IsString()
-  name: string;           
+  name: string;
 
   @IsNotEmpty()
   @IsString()
-  category: string;       
+  category: string;
 
   @IsOptional()
   @IsString()
-  date?: string;          
+  date?: string;
 
   @IsNotEmpty()
   @IsUrl()

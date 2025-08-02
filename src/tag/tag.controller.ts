@@ -6,15 +6,15 @@ import {
   Patch,
   Param,
   Delete,
-  Res,
   Req,
   ParseUUIDPipe,
+  Render,
+  Res,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { TagService } from './tag.service';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
-import { ResponseTagDto } from './dto/response.dto';
 import { CategoryService } from '../category/category.service';
 import { ResponseCategoryDto } from '../category/dto/response.dto';
 import { ApiExcludeController } from '@nestjs/swagger';
@@ -28,7 +28,8 @@ export class TagController {
   ) {}
 
   @Get()
-  async findAll(@Res() res: Response, @Req() req: Request) {
+  @Render('pages/tag-index')
+  async findAll(@Req() req: Request) {
     const user = req.session['user'];
     const [tags, rawCategories] = await Promise.all([
       this.tagService.findAll(),
@@ -38,25 +39,26 @@ export class TagController {
       (category) => new ResponseCategoryDto(category, ''),
     );
 
-    return res.render('pages/tag-index', {
+    return {
       tags,
       menu,
       user,
-    });
+    };
   }
 
   @Get('add')
-  async showAddForm(@Res() res: Response, @Req() req: Request) {
+  @Render('pages/tag-add')
+  async showAddForm(@Req() req: Request) {
     const user = req.session['user'];
     const rawCategories = await this.categoryService.findAll();
     const menu = rawCategories.map(
       (category) => new ResponseCategoryDto(category, ''),
     );
 
-    return res.render('pages/tag-add', {
+    return {
       menu,
       user,
-    });
+    };
   }
 
   @Post()
@@ -66,53 +68,41 @@ export class TagController {
   }
 
   @Get('detail/:uuid')
+  @Render('pages/tag-detail')
   async findOne(
     @Param('uuid', ParseUUIDPipe) uuid: string,
-    @Res() res: Response,
     @Req() req: Request,
   ) {
     const user = req.session['user'];
-    try {
-      const [rawCategories, tag] = await Promise.all([
-        this.categoryService.findAll(),
-        this.tagService.findOne(uuid),
-      ]);
+    const [rawCategories, tag] = await Promise.all([
+      this.categoryService.findAll(),
+      this.tagService.findOne(uuid),
+    ]);
 
-      const menu = rawCategories.map(
-        (category) => new ResponseCategoryDto(category, ''),
-      );
+    const menu = rawCategories.map(
+      (category) => new ResponseCategoryDto(category, ''),
+    );
 
-      return res.render('pages/tag-detail', { tag, menu, user });
-    } catch {
-      return res
-        .status(404)
-        .render('pages/error', { message: 'Tag not found' });
-    }
+    return { tag, menu, user };
   }
 
   @Get('edit/:uuid')
+  @Render('pages/tag-edit')
   async showEditForm(
     @Param('uuid', ParseUUIDPipe) uuid: string,
-    @Res() res: Response,
     @Req() req: Request,
   ) {
     const user = req.session['user'];
-    try {
-      const [rawCategories, tag] = await Promise.all([
-        this.categoryService.findAll(),
-        this.tagService.findOne(uuid),
-      ]);
+    const [rawCategories, tag] = await Promise.all([
+      this.categoryService.findAll(),
+      this.tagService.findOne(uuid),
+    ]);
 
-      const menu = rawCategories.map(
-        (category) => new ResponseCategoryDto(category, ''),
-      );
+    const menu = rawCategories.map(
+      (category) => new ResponseCategoryDto(category, ''),
+    );
 
-      return res.render('pages/tag-edit', { tag, menu, user });
-    } catch {
-      return res
-        .status(404)
-        .render('pages/error', { message: 'Tag not found' });
-    }
+    return { tag, menu, user };
   }
 
   @Patch(':uuid')
@@ -126,8 +116,11 @@ export class TagController {
   }
 
   @Delete(':uuid')
-  async remove(@Param('uuid', ParseUUIDPipe) uuid: string, @Res() res: Response) {
+  async remove(
+    @Param('uuid', ParseUUIDPipe) uuid: string,
+    @Res() res: Response,
+  ) {
     await this.tagService.remove(uuid);
     return res.redirect('/tag');
   }
-} 
+}
