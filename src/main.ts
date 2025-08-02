@@ -76,10 +76,10 @@ async function bootstrap() {
 
   app.use(
     session({
-      secret: 'test_secret', // можно просто строку, для тестов
+      secret: 'test_secret', 
       resave: false,
       saveUninitialized: false,
-      cookie: { maxAge: 60000 * 60 }, // 1 час
+      cookie: { maxAge: 60000 * 60 }, 
     }),
   );
 

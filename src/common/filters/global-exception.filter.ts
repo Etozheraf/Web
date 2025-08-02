@@ -20,7 +20,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const isApiRoute = request.url.startsWith('/api/');
 
     if (isApiRoute) {
-      // Для API возвращаем JSON
+      
       response.status(status).json({
         statusCode: status,
         timestamp: new Date().toISOString(),

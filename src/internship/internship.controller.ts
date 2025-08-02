@@ -218,7 +218,7 @@ export class InternshipController {
         return {
           data: JSON.stringify(event.internship),
           type: event.type,
-          id: event.type, // добавляем id для идентификации типа события
+          id: event.type, 
         } as MessageEvent;
       })
     );

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { InternshipService } from './internship.service';
 import { InternshipController } from './internship.controller';
 import { InternshipApiController } from './internship-api.controller';
+import { InternshipGraphQLResolver } from './internship-graphql.resolver';
 import { PrismaModule } from '../prisma/prisma.module';
 import { CategoryModule } from '../category/category.module';
 import { TagModule } from '../tag/tag.module';
@@ -9,7 +10,7 @@ import { TagModule } from '../tag/tag.module';
 @Module({
   imports: [PrismaModule, CategoryModule, TagModule],
   controllers: [InternshipController, InternshipApiController],
-  providers: [InternshipService],
+  providers: [InternshipService, InternshipGraphQLResolver],
   exports: [InternshipService],
 })
 export class InternshipModule {}
