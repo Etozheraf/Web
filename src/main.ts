@@ -44,6 +44,7 @@ async function bootstrap() {
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('hbs');
 
+
   hbs.registerHelper('section', section);
 
   const partialsPath = join(__dirname, '..', 'views', 'partials');

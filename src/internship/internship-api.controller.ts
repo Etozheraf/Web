@@ -10,6 +10,8 @@ import {
   HttpStatus,
   Query,
   ParseUUIDPipe,
+  UseInterceptors,
+  Header,
 } from '@nestjs/common';
 import { InternshipService } from './internship.service';
 import { CreateInternshipInput } from './dto/create-internship.input';
@@ -23,6 +25,7 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { Internship } from './entities/internship.entity';
+import { EtagInterceptor } from '../common/interceptors/etag.interceptor';
 
 @ApiTags('internships')
 @Controller('api/internships')
@@ -44,6 +47,8 @@ export class InternshipApiController {
   }
 
   @Get()
+  @UseInterceptors(EtagInterceptor)
+  @Header('Cache-Control', 'public, max-age=3600')
   @ApiOperation({
     summary: 'Get all internships, optionally filtered by category',
   })
@@ -63,11 +68,14 @@ export class InternshipApiController {
     description: 'Category is required for finding internships',
   })
   @ApiResponse({ status: 404, description: 'Category not found.' })
+  @ApiResponse({ status: 304, description: 'Not Modified' })
   async findByCategory(@Query('category') categoryName: string) {
     return this.internshipService.findByCategory(categoryName);
   }
 
   @Get(':uuid')
+  @UseInterceptors(EtagInterceptor)
+  @Header('Cache-Control', 'public, max-age=3600')
   @ApiOperation({ summary: 'Get an internship by uuid' })
   @ApiParam({
     name: 'uuid',
@@ -81,6 +89,7 @@ export class InternshipApiController {
     type: Internship,
   })
   @ApiResponse({ status: 404, description: 'Internship not found.' })
+  @ApiResponse({ status: 304, description: 'Not Modified' })
   async findOne(@Param('uuid', ParseUUIDPipe) uuid: string) {
     return this.internshipService.findOne(uuid);
   }
