@@ -8,15 +8,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     eventSource.addEventListener('created', (event) => {
         const data = JSON.parse(event.data);
-        toastr.success(`Стажировка создана: ${data.name}`);
+        toastr.success(`Создана стажировка ${data.name} в категории ${data.category.name}`);
     })  ;
     eventSource.addEventListener('updated', (event) => {
         const data = JSON.parse(event.data);
-        toastr.info(`Обновлена стажировка: ${data.name}`);
+        toastr.info(`Обновлена стажировка ${data.name} в категории ${data.category.name}`);
     });
     eventSource.addEventListener('deleted', (event) => {
         const data = JSON.parse(event.data);
-        toastr.warning(`Стажировка удалена: ${data.name}`);
+        toastr.warning(`Удалена стажировка ${data.name} в категории ${data.category.name}`);
     });
 
 

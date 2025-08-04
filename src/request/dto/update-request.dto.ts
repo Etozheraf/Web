@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsIn, IsUUID } from 'class-validator';
+import { IsOptional, IsString, IsIn, IsUUID, Length, Matches } from 'class-validator';
 
 export class UpdateRequestDto {
   @ApiProperty({
@@ -9,6 +9,8 @@ export class UpdateRequestDto {
   })
   @IsOptional()
   @IsString()
+  @Matches(/^[A-Za-zА-Яа-яЁё\s]+$/u, { message: 'Name must contain only letters, spaces' })
+  @Length(2, 30, { message: 'Name must be between 2 and 30 characters' })
   name?: string;
 
   @ApiProperty({
@@ -18,6 +20,8 @@ export class UpdateRequestDto {
   })
   @IsOptional()
   @IsString()
+  @Matches(/^[A-Za-zА-Яа-яЁё\s]+$/u, { message: 'Internship name must contain only letters, spaces' })
+  @Length(2, 30, { message: 'Internship name must be between 2 and 30 characters' })
   internshipName?: string;
 
   @ApiProperty({
@@ -37,6 +41,9 @@ export class UpdateRequestDto {
   })
   @IsOptional()
   @IsString()
+  @Matches(/^[A-Za-zА-Яа-яЁё0-9\s\.\-]*$/u, {
+    message: 'Dates must contain only letters, spaces, numbers, dots and hyphens',
+  })
   dates?: string;
 
   @ApiProperty({
@@ -46,6 +53,8 @@ export class UpdateRequestDto {
   })
   @IsOptional()
   @IsString()
+  @Matches(/^[A-Za-zА-Яа-яЁё\s]+$/u, { message: 'Category must contain only letters, spaces' })
+  @Length(2, 30, { message: 'Category must be between 2 and 30 characters' })
   category?: string;
 
   @ApiProperty({

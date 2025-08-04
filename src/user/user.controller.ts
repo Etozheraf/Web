@@ -7,14 +7,16 @@ import {
   Param,
   Delete,
   Render,
-  Res,
   Req,
   ParseUUIDPipe,
+  Redirect,
+  BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { LoginDto } from './dto/login.dto';
 import { CategoryService } from 'src/category/category.service';
 import { ResponseCategoryDto } from '../category/dto/response.dto';
@@ -27,18 +29,23 @@ export class UserController {
     private readonly categoryService: CategoryService) { }
 
   @Post('register')
-  async register(@Body() createUserDto: CreateUserDto, @Req() req: Request, @Res() res: Response) {
+  @Redirect()
+  async register(@Body() createUserDto: CreateUserDto, @Req() req: Request) {
     const user = await this.userService.register(createUserDto);
     req.session['user'] = {
       name: user.name,
       uuid: user.uuid
     };
 
-    return res.redirect(`/user/${user.uuid}`);
+    return {
+      url: `/user/${user.uuid}`,
+      statusCode: 302
+    };
   }
 
   @Post('login')
-  async login(@Body() loginDto: LoginDto, @Req() req: Request, @Res() res: Response) {
+  @Redirect()
+  async login(@Body() loginDto: LoginDto, @Req() req: Request) {
     const user = await this.userService.login(loginDto);
 
     req.session['user'] = {
@@ -46,17 +53,24 @@ export class UserController {
       uuid: user.uuid
     };
 
-    return res.redirect(`/user/${user.uuid}`);
+    return {
+      url: `/user/${user.uuid}`,
+      statusCode: 302
+    };
   }
 
   @Post('logout')
-  async logout(@Req() req: Request, @Res() res: Response) {
+  @Redirect('/')
+  async logout(@Req() req: Request) {
     req.session.destroy((err) => {
       if (err) {
         console.error('Session destruction error:', err);
       }
     });
-    return res.redirect('/');
+    return {
+      url: '/',
+      statusCode: 302
+    };
   }
 
   @Get('api/:id')
@@ -87,14 +101,14 @@ export class UserController {
   @Get('edit/:id')
   @Render('pages/user-edit')
   async showEditForm(@Param('id', ParseUUIDPipe) id: string) {
-      const [categories, userToEdit] = await Promise.all([
-        this.categoryService.findAll(),
-        this.userService.findOne(id),
-      ]);
+    const [categories, userToEdit] = await Promise.all([
+      this.categoryService.findAll(),
+      this.userService.findOne(id),
+    ]);
 
-      const menu = categories.map(
-        (category) => new ResponseCategoryDto(category, ''),
-      );
+    const menu = categories.map(
+      (category) => new ResponseCategoryDto(category, ''),
+    );
 
     return {
       user: userToEdit,
@@ -103,40 +117,43 @@ export class UserController {
   }
 
   @Patch(':id')
-  async update(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto, @Res() res: Response) {
-    try {
-      if (!updateUserDto.currentPassword) {
-        return res.status(400).render('pages/error', { message: 'Необходимо ввести текущий пароль' });
-      }
-
-      const user = await this.userService.findOne(id);
-      const isPasswordValid = await this.userService.validatePassword(updateUserDto.currentPassword, user.password);
-      
-      if (!isPasswordValid) {
-        return res.status(400).render('pages/error', { message: 'Неверный текущий пароль' });
-      }
-
-      delete updateUserDto.currentPassword;
-      
-      if (!updateUserDto.password) {
-        delete updateUserDto.password;
-      }
-
-      await this.userService.update(id, updateUserDto);
-      return res.redirect(`/user/${id}`);
-    } catch (error) {
-      return res.status(500).render('pages/error', { message: 'Ошибка при обновлении профиля' });
+  async update(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto) {
+    if (!updateUserDto.currentPassword) {
+      throw new BadRequestException('Необходимо ввести текущий пароль');
     }
+
+    const user = await this.userService.findOne(id);
+    const isPasswordValid = await this.userService.validatePassword(updateUserDto.currentPassword, user.password);
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Неверный текущий пароль');
+    }
+
+    delete updateUserDto.currentPassword;
+
+    if (!updateUserDto.password) {
+      delete updateUserDto.password;
+    }
+
+    await this.userService.update(id, updateUserDto);
+    return {
+      url: `/user/${id}`,
+      statusCode: 302
+    };
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response, @Req() req: Request) {
+  @Redirect('/')
+  async remove(@Param('id', ParseUUIDPipe) id: string, @Req() req: Request) {
     await this.userService.remove(id);
     req.session.destroy((err) => {
       if (err) {
         console.error('Session destruction error:', err);
       }
     });
-    return res.redirect('/');
+    return {
+      url: '/',
+      statusCode: 302
+    };
   }
 }

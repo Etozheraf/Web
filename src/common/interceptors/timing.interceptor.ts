@@ -14,16 +14,20 @@ export class TimingInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const startTime = Date.now();
+    const response = context.switchToHttp().getResponse();
     const request = context.switchToHttp().getRequest();
     const { method, url } = request;
+
+    const acceptHeader = request.headers['accept'] || '';
+
+    if (acceptHeader.includes('text/event-stream')) {
+      return next.handle();
+    }
 
     return next.handle().pipe(
       map((data) => {
         const elapsedTime = Date.now() - startTime;
         this.logger.log(`[${method}] ${url} - ${elapsedTime}ms`);
-
-        const response = context.switchToHttp().getResponse();
-        const acceptHeader = request.headers['accept'] || '';
 
         if (!acceptHeader.includes('text/html')) {
           response.header('X-Elapsed-Time', `${elapsedTime}ms`);

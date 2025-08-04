@@ -6,11 +6,14 @@ import {
   Param,
   Delete,
   Render,
-  Res,
   Req,
   ParseUUIDPipe,
+  Redirect,
+  UnauthorizedException,
+  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
-import { Response, Request } from 'express';
+import { Request } from 'express';
 import { RequestService } from './request.service';
 import { CreateRequestDto } from './dto/create-request.dto';
 import { InternshipService } from '../internship/internship.service';
@@ -52,28 +55,22 @@ export class RequestController {
   }
 
   @Post()
+  @Redirect('/requests')
   async create(
     @Body() createRequestDto: CreateRequestDto,
-    @Res() res: Response,
     @Req() req: Request,
   ) {
     const user = req.session['user'];
     if (!user) {
-      return res
-        .status(401)
-        .render('pages/error', { message: 'Необходимо авторизоваться' });
+      throw new UnauthorizedException('Необходимо авторизоваться');
     }
 
     if (!createRequestDto.internshipName) {
-      return res.status(400).render('pages/error', {
-        message: 'Необходимо указать название стажировки',
-      });
+      throw new BadRequestException('Необходимо указать название стажировки');
     }
 
     if (!createRequestDto.category) {
-      return res
-        .status(400)
-        .render('pages/error', { message: 'Необходимо выбрать категорию' });
+      throw new BadRequestException('Необходимо выбрать категорию');
     }
 
     const internship = await this.internshipService.findByNameAndCategory(
@@ -81,21 +78,26 @@ export class RequestController {
       createRequestDto.category,
     );
     if (!internship) {
-      return res.status(404).render('pages/error', {
-        message: 'Стажировка не найдена в указанной категории',
-      });
+      throw new NotFoundException('Стажировка не найдена в указанной категории');
     }
 
     createRequestDto.userUuid = user.uuid;
     createRequestDto.internshipUuid = internship.uuid;
 
     await this.requestService.create(createRequestDto);
-    return res.redirect('/requests');
+    return {
+      url: '/requests',
+      statusCode: 302
+    };
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
+  @Redirect('/requests')
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.requestService.remove(id);
-    return res.redirect('/requests');
+    return {
+      url: '/requests',
+      statusCode: 302
+    };
   }
 }

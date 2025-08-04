@@ -9,9 +9,9 @@ import {
   Req,
   ParseUUIDPipe,
   Render,
-  Res,
+  Redirect,
 } from '@nestjs/common';
-import { Response, Request } from 'express';
+import { Request } from 'express';
 import { TagService } from './tag.service';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
@@ -62,9 +62,13 @@ export class TagController {
   }
 
   @Post()
-  async create(@Body() createTagDto: CreateTagDto, @Res() res: Response) {
+  @Redirect('/tag')
+  async create(@Body() createTagDto: CreateTagDto) {
     await this.tagService.create(createTagDto);
-    return res.redirect('/tag');
+    return {
+      url: '/tag',
+      statusCode: 302
+    };
   }
 
   @Get('detail/:uuid')
@@ -106,21 +110,25 @@ export class TagController {
   }
 
   @Patch(':uuid')
+  @Redirect('/tag')
   async update(
     @Param('uuid', ParseUUIDPipe) uuid: string,
     @Body() updateTagDto: UpdateTagDto,
-    @Res() res: Response,
   ) {
     await this.tagService.update(uuid, updateTagDto);
-    return res.redirect('/tag');
+    return {
+      url: '/tag',
+      statusCode: 302
+    };
   }
 
   @Delete(':uuid')
-  async remove(
-    @Param('uuid', ParseUUIDPipe) uuid: string,
-    @Res() res: Response,
-  ) {
+  @Redirect('/tag')
+  async remove(@Param('uuid', ParseUUIDPipe) uuid: string) {
     await this.tagService.remove(uuid);
-    return res.redirect('/tag');
+    return {
+      url: '/tag',
+      statusCode: 302
+    };
   }
 }

@@ -6,7 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  Res,
   Query,
   UseInterceptors,
   UploadedFile,
@@ -18,9 +17,10 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
+  Redirect,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Response, Request } from 'express';
+import { Request } from 'express';
 import { memoryStorage } from 'multer';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -64,8 +64,6 @@ export class InternshipController {
       (category) => new ResponseCategoryDto(category, categoryName),
     );
 
-    console.log(internships.map((internship) => internship.imgUrl));
-
     return {
       internships,
       menu,
@@ -94,9 +92,9 @@ export class InternshipController {
 
   @Post('')
   @UseInterceptors(FileInterceptor('imageFile', { storage: memoryStorage() }))
+  @Redirect('/internship')
   async create(
     @Body() formDto: CreateInternshipDto,
-    @Res() res: Response,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -121,7 +119,10 @@ export class InternshipController {
     };
 
     const internship = await this.internshipService.create(input, new FileCreateImageStrategy(file));
-    return res.redirect(`/internship?category=${internship.category.name}`);
+    return {
+      url: `/internship?category=${internship.category.name}`,
+      statusCode: 302
+    };
   }
 
   @Get('detail/:uuid')
@@ -170,10 +171,10 @@ export class InternshipController {
 
   @Patch(':uuid')
   @UseInterceptors(FileInterceptor('imageFile', { storage: memoryStorage() }))
+  @Redirect('/internship')
   async update(
     @Param('uuid', ParseUUIDPipe) uuid: string,
     @Body() formDto: UpdateInternshipDto,
-    @Res() res: Response,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -201,17 +202,21 @@ export class InternshipController {
     };
 
     await this.internshipService.update(uuid, input, new FileUpdateImageStrategy(file));
-    return res.redirect(`/internship?category=${input.categoryName || 'all'}`);
+    return {
+      url: `/internship?category=${input.categoryName || 'all'}`,
+      statusCode: 302
+    };
   }
 
   @Delete(':uuid')
-  async remove(
-    @Param('uuid', ParseUUIDPipe) uuid: string,
-    @Res() res: Response,
-  ) {
+  @Redirect('/internship')
+  async remove(@Param('uuid', ParseUUIDPipe) uuid: string) {
     const internship = await this.internshipService.findOne(uuid);
     await this.internshipService.remove(uuid);
-    return res.redirect(`/internship?category=${internship.category.name}`);
+    return {
+      url: `/internship?category=${internship.category.name}`,
+      statusCode: 302
+    };
   }
 
   @Sse('sse')

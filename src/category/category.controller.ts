@@ -9,9 +9,9 @@ import {
   Req,
   ParseUUIDPipe,
   Render,
-  Res,
+  Redirect,
 } from '@nestjs/common';
-import { Response, Request } from 'express';
+import { Request } from 'express';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -55,12 +55,13 @@ export class CategoryController {
   }
 
   @Post()
-  async create(
-    @Body() createCategoryDto: CreateCategoryDto,
-    @Res() res: Response,
-  ) {
+  @Redirect('/category')
+  async create(@Body() createCategoryDto: CreateCategoryDto) {
     await this.categoryService.create(createCategoryDto);
-    return res.redirect('/category');
+    return {
+      url: '/category',
+      statusCode: 302
+    };
   }
 
   @Get('detail/:uuid')
@@ -98,21 +99,25 @@ export class CategoryController {
   }
 
   @Patch(':uuid')
+  @Redirect('/category')
   async update(
     @Param('uuid', ParseUUIDPipe) uuid: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
-    @Res() res: Response,
   ) {
     await this.categoryService.update(uuid, updateCategoryDto);
-    return res.redirect('/category');
+    return {
+      url: '/category',
+      statusCode: 302
+    };
   }
 
   @Delete(':uuid')
-  async remove(
-    @Param('uuid', ParseUUIDPipe) uuid: string,
-    @Res() res: Response,
-  ) {
+  @Redirect('/category')
+  async remove(@Param('uuid', ParseUUIDPipe) uuid: string) {
     await this.categoryService.remove(uuid);
-    return res.redirect('/category');
+    return {
+      url: '/category',
+      statusCode: 302
+    };
   }
 }

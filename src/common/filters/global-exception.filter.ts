@@ -52,7 +52,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       if (typeof response === 'object' && 'message' in response) {
         const message = (response as any).message;
         if (Array.isArray(message)) {
-          return message.join(', ');
+          return message.join('\n');
         }
         return message;
       }

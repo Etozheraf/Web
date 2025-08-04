@@ -5,6 +5,9 @@ import {
   IsEmail,
   MinLength,
   IsNotEmpty,
+  Matches,
+  Length,
+  IsAlphanumeric,
 } from 'class-validator';
 
 export class UpdateUserDto {
@@ -15,6 +18,8 @@ export class UpdateUserDto {
   })
   @IsOptional()
   @IsString()
+  @Matches(/^[A-Za-zА-Яа-яЁё\s]+$/u, { message: 'Name must contain only letters, spaces' })
+  @Length(2, 30, { message: 'Name must be between 2 and 30 characters' })
   name?: string;
 
   @ApiProperty({
@@ -34,7 +39,8 @@ export class UpdateUserDto {
   })
   @IsOptional()
   @IsString()
-  @MinLength(8)
+  @IsAlphanumeric('en-US', { message: 'Password must contain only numbers and english letters' })
+  @Length(8, 30, { message: 'Password must be between 8 and 30 characters' })
   password?: string;
 
   @ApiProperty({

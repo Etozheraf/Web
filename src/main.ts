@@ -37,7 +37,6 @@ async function bootstrap() {
   );
 
   app.useGlobalFilters(new GlobalExceptionFilter());
-
   app.useGlobalInterceptors(new TimingInterceptor());
 
   app.useStaticAssets(join(__dirname, '..', 'public'));
