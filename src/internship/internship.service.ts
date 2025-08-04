@@ -12,7 +12,9 @@ import { Prisma } from '@prisma/client';
 import { CategoryService } from '../category/category.service';
 import { TagService } from '../tag/tag.service';
 import { Observable, Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { StorageService } from '../storage/storage.service';
+import { UpdateImageStrategy } from './strategy/update-image.strategy';
+import { CreateImageStrategy } from './strategy/create-image.strategy';
 
 @Injectable()
 export class InternshipService {
@@ -25,61 +27,11 @@ export class InternshipService {
     private prisma: PrismaService,
     private categoryService: CategoryService,
     private tagService: TagService,
-  ) {}
+    private storageService: StorageService,
+  ) { }
 
   getEventsStream(): Observable<{ type: string; internship: Internship }> {
     return this.eventsSubject.asObservable();
-  }
-
-  async create(input: CreateInternshipInput) {
-    const category = await this.categoryService.findOrCreate(
-      input.categoryName,
-    );
-
-    const existingInternship = await this.prisma.internship.findUnique({
-      where: {
-        name_categoryUuid: {
-          name: input.name,
-          categoryUuid: category.uuid,
-        },
-      },
-      select: { uuid: true },
-    });
-    if (existingInternship) {
-      throw new ConflictException('Internship already exists');
-    }
-
-    let { tags: tagNames, categoryName, ...internshipData } = input;
-
-    if (!tagNames) {
-      tagNames = [];
-    }
-
-    const tags = await Promise.all(
-      tagNames.map((tagName) => this.tagService.findOrCreate(tagName)),
-    );
-
-    const internship = await this.prisma.internship.create({
-      data: {
-        ...internshipData,
-        date: internshipData.date,
-        imgUrl: internshipData.imgUrl,
-        category: {
-          connect: { uuid: category.uuid },
-        },
-        tags: {
-          connect: tags.map((tag) => ({ uuid: tag.uuid })),
-        },
-      },
-      include: {
-        category: true,
-        tags: true,
-      },
-    });
-
-    this.eventsSubject.next({ type: 'created', internship });
-
-    return internship;
   }
 
   async findOne(uuid: string) {
@@ -96,6 +48,29 @@ export class InternshipService {
     }
 
     return internship;
+  }
+
+  async findByNameAndCategory(name: string, categoryName: string) {
+    const category = await this.prisma.category.findUnique({
+      where: { name: categoryName },
+    });
+
+    if (!category) {
+      return null;
+    }
+
+    return this.prisma.internship.findUnique({
+      where: {
+        name_categoryUuid: {
+          name: name,
+          categoryUuid: category.uuid,
+        },
+      },
+      include: {
+        category: true,
+        tags: true,
+      },
+    });
   }
 
   async findByCategory(categoryName: string) {
@@ -141,20 +116,46 @@ export class InternshipService {
     return internships;
   }
 
-  async findByNameAndCategory(name: string, categoryName: string) {
-    const category = await this.prisma.category.findUnique({
-      where: { name: categoryName },
-    });
+  async create(input: CreateInternshipInput, imageStrategy: CreateImageStrategy) {
+    const category = await this.categoryService.findOrCreate(
+      input.categoryName,
+    );
 
-    if (!category) {
-      return null;
-    }
-
-    return this.prisma.internship.findUnique({
+    const existingInternship = await this.prisma.internship.findUnique({
       where: {
         name_categoryUuid: {
-          name: name,
+          name: input.name,
           categoryUuid: category.uuid,
+        },
+      },
+      select: { uuid: true },
+    });
+    if (existingInternship) {
+      throw new ConflictException('Internship already exists');
+    }
+
+    const imgUrl = await imageStrategy.create(this.storageService);
+
+    let { tags: tagNames, categoryName, ...internshipData } = input;
+
+    if (!tagNames) {
+      tagNames = [];
+    }
+
+    const tags = await Promise.all(
+      tagNames.map((tagName) => this.tagService.findOrCreate(tagName)),
+    );
+
+    const internship = await this.prisma.internship.create({
+      data: {
+        ...internshipData,
+        date: internshipData.date,
+        imgUrl,
+        category: {
+          connect: { uuid: category.uuid },
+        },
+        tags: {
+          connect: tags.map((tag) => ({ uuid: tag.uuid })),
         },
       },
       include: {
@@ -162,32 +163,34 @@ export class InternshipService {
         tags: true,
       },
     });
+
+    this.eventsSubject.next({ type: 'created', internship });
+
+    return internship;
   }
 
-  async update(uuid: string, input: UpdateInternshipInput) {
-    const currentInternship = await this.prisma.internship.findUnique({
-      where: { uuid },
-      include: {
-        category: true,
-      },
-    });
+  async update(
+    uuid: string,
+    input: UpdateInternshipInput,
+    imageStrategy: UpdateImageStrategy,
+  ) {
+    const currentInternship = await this.findOne(uuid);
 
-    if (!currentInternship) {
-      throw new NotFoundException(`Internship with uuid ${uuid} not found`);
-    }
+    const imgUrl = await imageStrategy.update(this.storageService, currentInternship.imgUrl);
 
     const { categoryName, tags: rawTags, ...internshipData } = input;
 
     const dataToUpdate: Prisma.InternshipUpdateInput = {
       ...internshipData,
+      imgUrl,
     };
 
     const [category, tags] = await Promise.all([
       categoryName ? this.categoryService.findOrCreate(categoryName) : null,
       rawTags !== undefined
         ? Promise.all(
-            rawTags.map((tagName) => this.tagService.findOrCreate(tagName)),
-          )
+          rawTags.map((tagName) => this.tagService.findOrCreate(tagName)),
+        )
         : null,
     ]);
 
@@ -218,15 +221,10 @@ export class InternshipService {
   }
 
   async remove(uuid: string) {
-    const internship = await this.prisma.internship.findUnique({
-      where: { uuid },
-      include: {
-        category: true,
-        tags: true,
-      },
-    });
-    if (!internship) {
-      throw new NotFoundException(`Internship with uuid ${uuid} not found`);
+    const internship = await this.findOne(uuid);
+
+    if (internship.imgUrl) {
+      await this.storageService.deleteFile(internship.imgUrl);
     }
 
     await this.prisma.internship.delete({ where: { uuid } });

@@ -15,10 +15,13 @@ import {
   MessageEvent,
   ParseUUIDPipe,
   Render,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response, Request } from 'express';
-import { diskStorage } from 'multer';
+import { memoryStorage } from 'multer';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { InternshipService } from './internship.service';
@@ -28,9 +31,9 @@ import { ResponseInternshipDto } from './dto/response-intership.dto';
 import { CategoryService } from 'src/category/category.service';
 import { ResponseCategoryDto } from '../category/dto/response.dto';
 import { TagService } from 'src/tag/tag.service';
-import { CreateInternshipInput } from './dto/create-internship.input';
-import { UpdateInternshipInput } from './dto/update-internship.input';
 import { ApiExcludeController } from '@nestjs/swagger';
+import { FileUpdateImageStrategy } from './strategy/update-image.strategy';
+import { FileCreateImageStrategy } from './strategy/create-image.strategy';
 
 @ApiExcludeController()
 @Controller('internship')
@@ -61,6 +64,8 @@ export class InternshipController {
       (category) => new ResponseCategoryDto(category, categoryName),
     );
 
+    console.log(internships.map((internship) => internship.imgUrl));
+
     return {
       internships,
       menu,
@@ -88,27 +93,22 @@ export class InternshipController {
   }
 
   @Post('')
-  @UseInterceptors(
-    FileInterceptor('imageFile', {
-      storage: diskStorage({
-        destination: './public/img',
-        filename: (req, file, cb) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const filename = `${uniqueSuffix}-${file.originalname}`;
-          cb(null, filename);
-        },
-      }),
-    }),
-  )
+  @UseInterceptors(FileInterceptor('imageFile', { storage: memoryStorage() }))
   async create(
     @Body() formDto: CreateInternshipDto,
-    @UploadedFile() file: Express.Multer.File,
     @Res() res: Response,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5 MB
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg|svg|webp)' }),
+        ],
+        fileIsRequired: true,
+      }),
+    )
+    file: Express.Multer.File,
   ) {
-    const imgUrl = file ? `/img/${file.filename}` : '';
-
-    const input: CreateInternshipInput = {
+    const input = {
       name: formDto.name,
       companyUrl: formDto.companyUrl,
       date: formDto.date ?? '',
@@ -118,10 +118,9 @@ export class InternshipController {
         .split(',')
         .map((t) => t.trim())
         .filter(Boolean),
-      imgUrl,
     };
 
-    const internship = await this.internshipService.create(input);
+    const internship = await this.internshipService.create(input, new FileCreateImageStrategy(file));
     return res.redirect(`/internship?category=${internship.category.name}`);
   }
 
@@ -170,28 +169,23 @@ export class InternshipController {
   }
 
   @Patch(':uuid')
-  @UseInterceptors(
-    FileInterceptor('imageFile', {
-      storage: diskStorage({
-        destination: './public/img',
-        filename: (req, file, cb) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const filename = `${uniqueSuffix}-${file.originalname}`;
-          cb(null, filename);
-        },
-      }),
-    }),
-  )
+  @UseInterceptors(FileInterceptor('imageFile', { storage: memoryStorage() }))
   async update(
     @Param('uuid', ParseUUIDPipe) uuid: string,
     @Body() formDto: UpdateInternshipDto,
-    @UploadedFile() file: Express.Multer.File,
     @Res() res: Response,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5 MB
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg|svg|webp)' }),
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    file?: Express.Multer.File,
   ) {
-    const imgUrl = file ? `/img/${file.filename}` : undefined;
-
-    const input: UpdateInternshipInput = {
+    const input = {
       name: formDto.name,
       companyUrl: formDto.companyUrl,
       date: formDto.date,
@@ -204,10 +198,9 @@ export class InternshipController {
               .map((t) => t.trim())
               .filter(Boolean)
           : undefined,
-      imgUrl,
     };
 
-    await this.internshipService.update(uuid, input);
+    await this.internshipService.update(uuid, input, new FileUpdateImageStrategy(file));
     return res.redirect(`/internship?category=${input.categoryName || 'all'}`);
   }
 

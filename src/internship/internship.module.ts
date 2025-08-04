@@ -6,9 +6,10 @@ import { InternshipGraphQLResolver } from './internship-graphql.resolver';
 import { PrismaModule } from '../prisma/prisma.module';
 import { CategoryModule } from '../category/category.module';
 import { TagModule } from '../tag/tag.module';
+import { StorageModule } from '../storage/storage.module';
 
 @Module({
-  imports: [PrismaModule, CategoryModule, TagModule],
+  imports: [PrismaModule, CategoryModule, TagModule, StorageModule],
   controllers: [InternshipController, InternshipApiController],
   providers: [InternshipService, InternshipGraphQLResolver],
   exports: [InternshipService],

@@ -24,8 +24,4 @@ export class UpdateInternshipDto {
   @IsOptional()
   @IsString()
   tags?: string;
-
-  @IsOptional()
-  @IsUrl()
-  imgUrl?: string;
 }

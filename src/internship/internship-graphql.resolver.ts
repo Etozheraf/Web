@@ -3,6 +3,8 @@ import { InternshipService } from './internship.service';
 import { InternshipObject } from './dto/internship.object';
 import { CreateInternshipInput } from './dto/create-internship.input.graphql';
 import { UpdateInternshipInput } from './dto/update-internship.input.graphql';
+import { UrlCreateImageStrategy } from './strategy/create-image.strategy';
+import { UrlUpdateImageStrategy } from './strategy/update-image.strategy';
 
 @Resolver(() => InternshipObject)
 export class InternshipGraphQLResolver {
@@ -48,7 +50,7 @@ export class InternshipGraphQLResolver {
   async createInternship(
     @Args('createInternshipInput') createInternshipInput: CreateInternshipInput,
   ): Promise<InternshipObject> {
-    return this.internshipService.create(createInternshipInput);
+    return this.internshipService.create(createInternshipInput, new UrlCreateImageStrategy(createInternshipInput.imgUrl));
   }
 
   @Mutation(() => InternshipObject, {
@@ -61,27 +63,8 @@ export class InternshipGraphQLResolver {
     return this.internshipService.update(
       updateInternshipInput.uuid,
       updateInternshipInput,
+      new UrlUpdateImageStrategy(updateInternshipInput.imgUrl),
     );
-  }
-
-  @Mutation(() => InternshipObject, {
-    name: 'publishInternship',
-    description: 'Открыть стажировку для подачи заявок',
-  })
-  async publishInternship(
-    @Args('id', { type: () => ID, description: 'ID стажировки' }) id: string,
-  ): Promise<InternshipObject> {
-    return this.internshipService.update(id, { closed: false });
-  }
-
-  @Mutation(() => InternshipObject, {
-    name: 'hideInternship',
-    description: 'Закрыть стажировку для подачи заявок',
-  })
-  async hideInternship(
-    @Args('id', { type: () => ID, description: 'ID стажировки' }) id: string,
-  ): Promise<InternshipObject> {
-    return this.internshipService.update(id, { closed: true });
   }
 
   @Mutation(() => Boolean, {

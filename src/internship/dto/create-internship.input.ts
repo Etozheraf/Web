@@ -49,12 +49,4 @@ export class CreateInternshipInput {
   @IsArray()
   @IsString({ each: true })
   tags: string[];
-
-  @ApiProperty({
-    example: '/img/logo.png',
-    description: 'The URL of the internship image',
-  })
-  @IsString()
-  @IsNotEmpty()
-  imgUrl: string;
 }

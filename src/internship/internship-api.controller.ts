@@ -12,38 +12,79 @@ import {
   ParseUUIDPipe,
   UseInterceptors,
   Header,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { InternshipService } from './internship.service';
 import { CreateInternshipInput } from './dto/create-internship.input';
 import { UpdateInternshipInput } from './dto/update-internship.input';
 import {
+  ApiExtraModels,
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBody,
   ApiQuery,
   ApiParam,
+  ApiConsumes,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { Internship } from './entities/internship.entity';
 import { EtagInterceptor } from '../common/interceptors/etag.interceptor';
+import { memoryStorage } from 'multer';
+import { FileCreateImageStrategy } from './strategy/create-image.strategy';
+import { FileUpdateImageStrategy } from './strategy/update-image.strategy';
 
 @ApiTags('internships')
 @Controller('api/internships')
+@ApiExtraModels(CreateInternshipInput, UpdateInternshipInput)
 export class InternshipApiController {
   constructor(private readonly internshipService: InternshipService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(FileInterceptor('imageFile', { storage: memoryStorage() }))
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Create a new internship' })
-  @ApiBody({ type: CreateInternshipInput })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        imageFile: {
+          type: 'string',
+          format: 'binary',
+          description: 'Image file (e.g., PNG, JPEG, SVG)',
+          nullable: true,
+        },
+        data: {
+          $ref: getSchemaPath(CreateInternshipInput),
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 201,
     description: 'The internship has been successfully created.',
     type: Internship,
   })
   @ApiResponse({ status: 409, description: 'Internship already exists.' })
-  async create(@Body() createInternshipInput: CreateInternshipInput) {
-    return this.internshipService.create(createInternshipInput);
+  async create(
+    @Body() createInternshipInput: CreateInternshipInput,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5 MB
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg|svg|webp)' }),
+        ],
+        fileIsRequired: true,
+      }),
+    )
+    imageFile: Express.Multer.File,
+  ) {
+    return this.internshipService.create(createInternshipInput, new FileCreateImageStrategy(imageFile));
   }
 
   @Get()
@@ -95,6 +136,8 @@ export class InternshipApiController {
   }
 
   @Patch(':uuid')
+  @UseInterceptors(FileInterceptor('imageFile', { storage: memoryStorage() }))
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Update an internship' })
   @ApiParam({
     name: 'uuid',
@@ -102,7 +145,22 @@ export class InternshipApiController {
     description: 'The uuid of the internship',
     required: true,
   })
-  @ApiBody({ type: UpdateInternshipInput })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        imageFile: {
+          type: 'string',
+          format: 'binary',
+          description: 'Image file (e.g., PNG, JPEG, SVG)',
+          nullable: true,
+        },
+        data: {
+          $ref: getSchemaPath(UpdateInternshipInput),
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 200,
     description: 'The internship has been successfully updated.',
@@ -112,8 +170,22 @@ export class InternshipApiController {
   async update(
     @Param('uuid', ParseUUIDPipe) uuid: string,
     @Body() updateInternshipInput: UpdateInternshipInput,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5 MB
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg|svg|webp)' }),
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    imageFile?: Express.Multer.File,
   ) {
-    return this.internshipService.update(uuid, updateInternshipInput);
+    return this.internshipService.update(
+      uuid,
+      updateInternshipInput,
+      new FileUpdateImageStrategy(imageFile),
+    );
   }
 
   @Delete(':uuid')

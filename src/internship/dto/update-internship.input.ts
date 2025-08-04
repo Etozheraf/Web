@@ -63,13 +63,4 @@ export class UpdateInternshipInput {
   @IsArray()
   @IsString({ each: true })
   tags?: string[];
-
-  @ApiProperty({
-    example: '/img/new_logo.png',
-    description: 'The updated URL of the internship image',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  imgUrl?: string;
 }
