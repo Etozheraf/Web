@@ -31,6 +31,22 @@ async function bootstrap() {
     .addTag('users')
     .addTag('categories')
     .addTag('tags')
+    .addTag('auth')
+    .addCookieAuth('sAccessToken', {
+      type: 'http',
+      in: 'cookie',
+      scheme: 'bearer',
+    })
+    .addCookieAuth('sRefreshToken', {
+      type: 'http', 
+      in: 'cookie',
+      scheme: 'bearer',
+    })
+    .addSecurity('session', {
+      type: 'apiKey',
+      in: 'cookie',
+      name: 'sAccessToken',
+    })
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

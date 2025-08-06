@@ -7,6 +7,7 @@ import {
     UseInterceptors,
     UploadedFile,
     BadRequestException,
+    UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -15,12 +16,18 @@ import {
     ApiConsumes,
     ApiBody,
     ApiResponse,
-    ApiParam,
+    ApiSecurity,
 } from '@nestjs/swagger';
 import { StorageService } from './storage.service';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from 'src/auth/role.enum';
 
 @ApiTags('Storage')
 @Controller('api/storage')
+@ApiSecurity('session')
+@UseGuards(RolesGuard)
+@Roles(Role.Admin)
 export class StorageApiController {
     constructor(private readonly storageService: StorageService) { }
 

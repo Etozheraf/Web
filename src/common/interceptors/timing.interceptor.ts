@@ -6,7 +6,7 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { tap, map } from 'rxjs/operators';
 
 @Injectable()
 export class TimingInterceptor implements NestInterceptor {
@@ -25,20 +25,23 @@ export class TimingInterceptor implements NestInterceptor {
     }
 
     return next.handle().pipe(
-      map((data) => {
+      tap(() => {
         const elapsedTime = Date.now() - startTime;
         this.logger.log(`[${method}] ${url} - ${elapsedTime}ms`);
 
-        // if (response.headersSent) {
-        //   return data;
-        // }
-        
-        if (!acceptHeader.includes('text/html')) {
-          response.header('X-Elapsed-Time', `${elapsedTime}ms`);
-          return data;
+        if (!acceptHeader.includes('text/html') && !response.headersSent) {
+          response.setHeader('X-Elapsed-Time', `${elapsedTime}ms`);
         }
+      }),
+      map((data) => {
+        const elapsedTime = Date.now() - startTime;
 
-        if (typeof data === 'object' && data !== null && !Array.isArray(data)) {
+        if (
+          acceptHeader.includes('text/html') &&
+          typeof data === 'object' &&
+          data !== null &&
+          !Array.isArray(data)
+        ) {
           return { ...data, elapsedTime: `${elapsedTime}ms` };
         }
 

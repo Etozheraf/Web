@@ -20,6 +20,7 @@ import {
   ApiResponse,
   ApiBody,
   ApiParam,
+  ApiSecurity,
 } from '@nestjs/swagger';
 import { Category } from './entities/category.entity';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -27,6 +28,7 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/role.enum';
 
 
+@ApiSecurity('session')
 @UseGuards(RolesGuard)
 @Roles(Role.Admin)
 @ApiTags('categories')
