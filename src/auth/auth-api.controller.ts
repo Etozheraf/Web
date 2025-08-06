@@ -8,8 +8,9 @@ import {
   UseGuards,
   UnauthorizedException,
   Redirect,
-} from '@nestjs/common';
-import { Request } from 'express';
+  } from '@nestjs/common';
+  import { ApiTags, ApiSecurity, ApiOperation, ApiResponse } from '@nestjs/swagger';
+  import { Request } from 'express';
 import { SignUpDto } from './dto/sign-up.dto';
 import { AuthService } from './auth.service';
 import {
@@ -23,11 +24,16 @@ import { RolesGuard } from './guards/roles.guard';
 import { Roles } from './decorators/roles.decorator';
 import { Role } from './role.enum'
 
-@PublicAccess()
+@ApiTags('auth')
 @Controller('api/auth')
 export class AuthApiController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
+  @ApiSecurity('session')
+  @ApiOperation({ summary: 'Регистрация администратора' })
+  @ApiResponse({ status: 201, description: 'Администратор успешно зарегистрирован' })
+  @ApiResponse({ status: 401, description: 'Неавторизован' })
+  @ApiResponse({ status: 403, description: 'Недостаточно прав' })
   @UseGuards(RolesGuard)
   @Roles(Role.Admin)
   @Post('register-admin')
@@ -42,6 +48,10 @@ export class AuthApiController {
     return { status: 'success' };
   }
 
+  @ApiOperation({ summary: 'Регистрация пользователя' })
+  @ApiResponse({ status: 201, description: 'Пользователь успешно зарегистрирован' })
+  @ApiResponse({ status: 400, description: 'Неверные данные' })
+  @PublicAccess()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(
@@ -53,7 +63,11 @@ export class AuthApiController {
     await createNewSession(req, req.res, 'public', recipeUserId);
     return { status: 'success' };
   }
-
+  
+  @ApiOperation({ summary: 'Вход в систему' })
+  @ApiResponse({ status: 200, description: 'Успешный вход' })
+  @ApiResponse({ status: 401, description: 'Неверные учетные данные' })
+  @PublicAccess()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(
@@ -67,6 +81,10 @@ export class AuthApiController {
     return { user };
   }
 
+  @ApiSecurity('session')
+  @ApiOperation({ summary: 'Выход из системы' })
+  @ApiResponse({ status: 200, description: 'Успешный выход' })
+  @ApiResponse({ status: 401, description: 'Неавторизован' })
   @Post('logout')
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
