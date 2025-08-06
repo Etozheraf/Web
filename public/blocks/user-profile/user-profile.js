@@ -9,9 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             loader.style.display = "flex";
 
-            const userId = window.location.pathname.split('/')[2];
-            const response = await fetch(`/user/api/${userId}`);
-            
+            const response = await fetch(`/user/api`);
+
             if (!response.ok) {
                 toastr.error('Не удалось загрузить данные пользователя', 'Ошибка');
                 throw new Error("Сеть недоступна");

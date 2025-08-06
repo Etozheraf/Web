@@ -25,11 +25,12 @@ document.querySelector('.login').addEventListener('click', () => {
           return false;
         }
 
-        return fetch('/user/login', {
+        return fetch('/api/auth/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include',
           body: JSON.stringify({ email, password }),
         })
           .then(async (response) => {
@@ -37,7 +38,7 @@ document.querySelector('.login').addEventListener('click', () => {
               const errorData = await response.json();
               throw new Error(errorData.message || 'Ошибка входа');
             }
-            // The response from a redirect is special, we need to check the redirected status
+
             if (response.redirected) {
               window.location.href = response.url;
               return;
@@ -50,7 +51,7 @@ document.querySelector('.login').addEventListener('click', () => {
       },
     }).then((result) => {
       if (result.isConfirmed && result.value) {
-        // Redirect is handled in preConfirm
+        window.location.href = '/user';
       }
     });
   };
@@ -90,11 +91,12 @@ document.querySelector('.login').addEventListener('click', () => {
           return false;
         }
 
-        return fetch('/user/register', {
+        return fetch('/api/auth/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include',
           body: JSON.stringify({ name, email, password }),
         })
           .then(async (response) => {
@@ -114,7 +116,7 @@ document.querySelector('.login').addEventListener('click', () => {
       },
     }).then((result) => {
       if (result.isConfirmed && result.value) {
-        // Redirect is handled in preConfirm
+        window.location.href = '/user';
       }
     });
   };

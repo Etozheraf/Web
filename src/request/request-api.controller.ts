@@ -9,6 +9,7 @@ import {
   HttpStatus,
   Query,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { RequestService } from './request.service';
 import { CreateRequestDto } from './dto/create-request.dto';
@@ -21,7 +22,12 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { Request } from './entities/request.entity';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from 'src/auth/role.enum';
 
+@UseGuards(RolesGuard)
+@Roles(Role.Admin)
 @ApiTags('requests')
 @Controller('api/requests')
 export class RequestApiController {

@@ -28,16 +28,6 @@ export class UserGraphQLResolver {
     return this.userService.findOne(id);
   }
 
-  @Mutation(() => UserObject, {
-    name: 'registerUser',
-    description: 'Зарегистрировать нового пользователя',
-  })
-  async registerUser(
-    @Args('createUserInput') createUserInput: CreateUserInput,
-  ): Promise<UserObject> {
-    return this.userService.register(createUserInput);
-  }
-
   @Mutation(() => Boolean, {
     name: 'removeUser',
     description: 'Удалить пользователя',

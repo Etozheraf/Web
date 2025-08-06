@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import {
@@ -17,12 +17,27 @@ import { TagModule } from './tag/tag.module';
 import { TimingInterceptor } from './common/interceptors/timing.interceptor';
 import { CacheModule } from '@nestjs/cache-manager';
 import { StorageModule } from './storage/storage.module';
+import { AuthModule } from './auth/auth.module';
+import { ConfigService } from '@nestjs/config';
+import { AuthModuleConfig } from './auth/config.interface';
+import { AuthGuard } from './auth/guards/auth.guard';
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+    }),
+    AuthModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (
+        configService: ConfigService,
+      ): AuthModuleConfig => ({
+        connectionURI: configService.get<string>('SUPERTOKENS_CONNECTION_URI') || '',
+        apiKey: configService.get<string>('SUPERTOKENS_API_KEY'),
+      }),
+      inject: [ConfigService],
     }),
     CacheModule.register({
       isGlobal: true,
@@ -67,6 +82,14 @@ import { StorageModule } from './storage/storage.module';
       provide: APP_INTERCEPTOR,
       useClass: TimingInterceptor,
     },
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: GlobalExceptionFilter,
+    }
   ],
 })
 export class AppModule {}

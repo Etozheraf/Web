@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   Patch,
   Param,
@@ -9,11 +8,10 @@ import {
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { LoginDto } from './dto/login.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -22,41 +20,18 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from 'src/auth/role.enum';
 
+@UseGuards(RolesGuard)
+@Roles(Role.Admin)
 @ApiTags('users')
 @Controller('api/users')
 export class UserApiController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('register')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Register a new user' })
-  @ApiBody({ type: CreateUserDto })
-  @ApiResponse({
-    status: 201,
-    description: 'The user has been successfully registered.',
-    type: User,
-  })
-  @ApiResponse({ status: 409, description: 'User already exists.' })
-  async register(@Body() createUserDto: CreateUserDto) {
-    return this.userService.register(createUserDto);
-  }
-
-  @Post('login')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Log in a user' })
-  @ApiBody({ type: LoginDto })
-  @ApiResponse({
-    status: 200,
-    description: 'The user has been successfully logged in.',
-    type: User,
-  })
-  @ApiResponse({ status: 401, description: 'Invalid credentials.' })
-  async login(@Body() loginDto: LoginDto) {
-    return this.userService.login(loginDto);
-  }
-
-  @Get(':uuid')
+  @Get()
   @ApiOperation({ summary: 'Get a user by uuid' })
   @ApiParam({
     name: 'uuid',

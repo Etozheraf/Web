@@ -3,11 +3,8 @@ import {
   IsOptional,
   IsString,
   IsEmail,
-  MinLength,
-  IsNotEmpty,
   Matches,
   Length,
-  IsAlphanumeric,
 } from 'class-validator';
 
 export class UpdateUserDto {
@@ -30,25 +27,4 @@ export class UpdateUserDto {
   @IsOptional()
   @IsEmail()
   email?: string;
-
-  @ApiProperty({
-    example: 'newPassword123',
-    description: 'The new password for the user',
-    minLength: 8,
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  @IsAlphanumeric('en-US', { message: 'Password must contain only numbers and english letters' })
-  @Length(8, 30, { message: 'Password must be between 8 and 30 characters' })
-  password?: string;
-
-  @ApiProperty({
-    example: 'password123',
-    description:
-      'The current password of the user (required to update any user data)',
-  })
-  @IsNotEmpty()
-  @IsString()
-  currentPassword?: string;
 }

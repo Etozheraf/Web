@@ -28,13 +28,13 @@
     <p class="user-profile__el user-profile__el_hidden"></p>
 
     <div class="detail-buttons">
-      <form action="/user/logout" method="POST">
+      <form action="/api/auth/logout" method="POST">
         <button type="submit" class="detail-buttons__el">Выйти</button>
       </form>
     </div>
     <div class="detail-buttons">
-      <a href="/user/edit/{{user.uuid}}" class="detail-buttons__el">Редактировать</a>
-      <form action="/user/{{user.uuid}}" method="POST" style="display: inline;">
+      <a href="/user/edit" class="detail-buttons__el">Редактировать</a>
+      <form action="/user" method="POST" style="display: inline;">
         <input type="hidden" name="_method" value="DELETE" />
         <button type="submit" class="detail-buttons__el"
           onclick="return confirm('Вы уверены, что хотите удалить аккаунт?')">Удалить аккаунт</button>

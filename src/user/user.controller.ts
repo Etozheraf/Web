@@ -1,26 +1,23 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   Patch,
   Param,
   Delete,
   Render,
   Req,
-  ParseUUIDPipe,
   Redirect,
-  BadRequestException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Request } from 'express';
-import { LoginDto } from './dto/login.dto';
+import { Request, Response } from 'express';
 import { CategoryService } from 'src/category/category.service';
 import { ResponseCategoryDto } from '../category/dto/response.dto';
 import { ApiExcludeController } from '@nestjs/swagger';
+import Session from 'supertokens-node/recipe/session';
+import SuperTokens from 'supertokens-node';
 
 @ApiExcludeController()
 @Controller('user')
@@ -28,65 +25,30 @@ export class UserController {
   constructor(private readonly userService: UserService,
     private readonly categoryService: CategoryService) { }
 
-  @Post('register')
-  @Redirect()
-  async register(@Body() createUserDto: CreateUserDto, @Req() req: Request) {
-    const user = await this.userService.register(createUserDto);
-    req.session['user'] = {
-      name: user.name,
-      uuid: user.uuid
-    };
+  @Get('api')
+  async findOneApi(@Req() req: Request) {
+    const session = await Session.getSession(req, req.res);
+    if (!session) {
+      throw new UnauthorizedException('Session not found');
+    }
 
-    return {
-      url: `/user/${user.uuid}`,
-      statusCode: 302
-    };
+    const authId = session.getUserId();
+    const user = await this.userService.findByAuthId(authId);
+    return user;
   }
 
-  @Post('login')
-  @Redirect()
-  async login(@Body() loginDto: LoginDto, @Req() req: Request) {
-    const user = await this.userService.login(loginDto);
-
-    req.session['user'] = {
-      name: user.name,
-      uuid: user.uuid
-    };
-
-    return {
-      url: `/user/${user.uuid}`,
-      statusCode: 302
-    };
-  }
-
-  @Post('logout')
-  @Redirect('/')
-  async logout(@Req() req: Request) {
-    req.session.destroy((err) => {
-      if (err) {
-        console.error('Session destruction error:', err);
-      }
-    });
-    return {
-      url: '/',
-      statusCode: 302
-    };
-  }
-
-  @Get('api/:id')
-  async findOneApi(@Param('id', ParseUUIDPipe) id: string) {
-    const user = await this.userService.findOne(id);
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
-  }
-
-  @Get(':id')
+  @Get()
   @Render('pages/user')
-  async findOne(@Param('id', ParseUUIDPipe) id: string) {
-    const [categories, user] = await Promise.all([
-      this.categoryService.findAll(),
-      this.userService.findOne(id),
-    ]);
+  async findOne(@Req() req: Request) {
+    const session = await Session.getSession(req, req.res);
+    if (!session) {
+      throw new UnauthorizedException('Session not found');
+    }
+
+    const authId = session.getUserId();
+
+    const categories = await this.categoryService.findAll();
+    const user = await this.userService.findByAuthId(authId);
 
     const menu = categories.map(
       (category) => new ResponseCategoryDto(category, ''),
@@ -98,13 +60,13 @@ export class UserController {
     };
   }
 
-  @Get('edit/:id')
+  @Get('edit')
   @Render('pages/user-edit')
-  async showEditForm(@Param('id', ParseUUIDPipe) id: string) {
-    const [categories, userToEdit] = await Promise.all([
-      this.categoryService.findAll(),
-      this.userService.findOne(id),
-    ]);
+  async showEditForm(@Req() req: Request) {
+    const session = await Session.getSession(req, req.res);
+    const authId = session.getUserId();
+    const categories = await this.categoryService.findAll();
+    const userToEdit = await this.userService.findByAuthId(authId);
 
     const menu = categories.map(
       (category) => new ResponseCategoryDto(category, ''),
@@ -116,44 +78,28 @@ export class UserController {
     };
   }
 
-  @Patch(':id')
-  async update(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto) {
-    if (!updateUserDto.currentPassword) {
-      throw new BadRequestException('Необходимо ввести текущий пароль');
+  @Patch('')
+  @Redirect('/user')
+  async update(@Body() updateUserDto: UpdateUserDto, @Req() req: Request) {
+    console.log("updateUserDto", updateUserDto);
+
+    const session = await Session.getSession(req, req.res);
+    if (!session) {
+      throw new UnauthorizedException('Session not found');
     }
 
-    const user = await this.userService.findOne(id);
-    const isPasswordValid = await this.userService.validatePassword(updateUserDto.currentPassword, user.password);
-
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Неверный текущий пароль');
-    }
-
-    delete updateUserDto.currentPassword;
-
-    if (!updateUserDto.password) {
-      delete updateUserDto.password;
-    }
-
-    await this.userService.update(id, updateUserDto);
-    return {
-      url: `/user/${id}`,
-      statusCode: 302
-    };
+    const authId = session.getUserId();
+    await this.userService.updateByAuthId(authId, updateUserDto);
+    return;
   }
 
-  @Delete(':id')
+  @Delete()
   @Redirect('/')
-  async remove(@Param('id', ParseUUIDPipe) id: string, @Req() req: Request) {
-    await this.userService.remove(id);
-    req.session.destroy((err) => {
-      if (err) {
-        console.error('Session destruction error:', err);
-      }
-    });
-    return {
-      url: '/',
-      statusCode: 302
-    };
+  async remove(@Req() req: Request) {
+    const session = await Session.getSession(req, req.res);
+    const authId = session.getUserId();
+    await this.userService.removeByAuthId(authId);
+    await SuperTokens.deleteUser(authId);
+    return;
   }
 }

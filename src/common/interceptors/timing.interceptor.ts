@@ -29,6 +29,10 @@ export class TimingInterceptor implements NestInterceptor {
         const elapsedTime = Date.now() - startTime;
         this.logger.log(`[${method}] ${url} - ${elapsedTime}ms`);
 
+        // if (response.headersSent) {
+        //   return data;
+        // }
+        
         if (!acceptHeader.includes('text/html')) {
           response.header('X-Elapsed-Time', `${elapsedTime}ms`);
           return data;

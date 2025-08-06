@@ -5,9 +5,6 @@ export class UserObject {
   @Field(() => ID, { description: 'Уникальный идентификатор пользователя' })
   uuid: string;
 
-  @Field({ description: 'Имя пользователя' })
-  name: string;
-
   @Field({ description: 'Email пользователя' })
   email: string;
 }

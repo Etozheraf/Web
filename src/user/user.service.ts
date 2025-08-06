@@ -1,59 +1,16 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import * as bcrypt from 'bcrypt';
-import { LoginDto } from './dto/login.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  async register(createUserDto: CreateUserDto) {
-    const user = await this.findByEmail(createUserDto.email);
-    if (user) {
-      throw new ConflictException('User exists');
-    }
-
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
+  async create(createUserDto: CreateUserDto) {
     return this.prisma.user.create({
-      data: {
-        ...createUserDto,
-        password: hashedPassword,
-      },
+      data: createUserDto,
     });
-  }
-
-  async login(loginDto: LoginDto) {
-    const user = await this.findByEmail(loginDto.email);
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const isPasswordMatching = await bcrypt.compare(
-      loginDto.password,
-      user.password,
-    );
-
-    if (!isPasswordMatching) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const { password, ...result } = user;
-    return result;
-  }
-
-  async validatePassword(
-    plainPassword: string,
-    hashedPassword: string,
-  ): Promise<boolean> {
-    return bcrypt.compare(plainPassword, hashedPassword);
   }
 
   async findOne(uuid: string) {
@@ -66,6 +23,16 @@ export class UserService {
     return user;
   }
 
+  async findByAuthId(authId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { authId },
+    });
+    if (!user) {
+      throw new NotFoundException(`User with authId ${authId} not found`);
+    }
+    return user;
+  }
+
   async findByEmail(email: string) {
     return this.prisma.user.findUnique({
       where: { email },
@@ -73,16 +40,17 @@ export class UserService {
   }
 
   async update(uuid: string, updateUserDto: UpdateUserDto) {
-    const updateData = { ...updateUserDto };
-
-    if (updateData.password) {
-      const salt = await bcrypt.genSalt();
-      updateData.password = await bcrypt.hash(updateData.password, salt);
-    }
-
     return this.prisma.user.update({
       where: { uuid },
-      data: updateData,
+      data: updateUserDto,
+    });
+  }
+
+  async updateByAuthId(authId: string, updateUserDto: UpdateUserDto) {
+    const user = await this.findByAuthId(authId);
+    return this.prisma.user.update({
+      where: { uuid: user.uuid },
+      data: updateUserDto,
     });
   }
 
@@ -91,4 +59,12 @@ export class UserService {
       where: { uuid },
     });
   }
+
+  async removeByAuthId(authId: string) {
+    const user = await this.findByAuthId(authId);
+    return this.prisma.user.delete({
+      where: { uuid: user.uuid },
+    });
+  }
 }
+

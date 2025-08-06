@@ -10,11 +10,17 @@ import * as hbs from 'hbs';
 import { section } from './common/helpers/hbs.helpers';
 import * as methodOverride from 'method-override';
 import * as express from 'express';
-import * as session from 'express-session';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import supertokens from 'supertokens-node';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.enableCors({
+    origin: ['http://localhost:3000'],
+    allowedHeaders: ['content-type', ...supertokens.getAllCORSHeaders()],
+    credentials: true,
+  });
 
   const config = new DocumentBuilder()
     .setTitle('Internships aggregator API')
@@ -31,13 +37,11 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new ValidationPipe({
-      forbidNonWhitelisted: true,
+      whitelist: true,
+      forbidNonWhitelisted: false,
       transform: true,
     }),
   );
-
-  app.useGlobalFilters(new GlobalExceptionFilter());
-  app.useGlobalInterceptors(new TimingInterceptor());
 
   app.useStaticAssets(join(__dirname, '..', 'public'));
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
@@ -74,15 +78,6 @@ async function bootstrap() {
         delete req.body._method;
         return m;
       }
-    }),
-  );
-
-  app.use(
-    session({
-      secret: 'test_secret',
-      resave: false,
-      saveUninitialized: false,
-      cookie: { maxAge: 60000 * 60 },
     }),
   );
 

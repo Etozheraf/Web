@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -21,7 +22,13 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { Category } from './entities/category.entity';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from 'src/auth/role.enum';
 
+
+@UseGuards(RolesGuard)
+@Roles(Role.Admin)
 @ApiTags('categories')
 @Controller('api/categories')
 export class CategoryApiController {

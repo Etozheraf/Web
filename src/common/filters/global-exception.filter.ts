@@ -19,7 +19,18 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     const isApiRoute = request.url.startsWith('/api/');
 
+    console.log(exception);
+
     if (isApiRoute) {
+      if (status >= 500) {
+        response.status(status).json({
+          statusCode: status,
+          timestamp: new Date().toISOString(),
+          path: request.url,
+          method: request.method,
+        });
+        return;
+      }
       response.status(status).json({
         statusCode: status,
         timestamp: new Date().toISOString(),
@@ -30,6 +41,12 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       return;
     }
 
+    if (status >= 500) {
+      response.status(status).render('pages/error', {
+        statusCode: status,
+      });
+      return;
+    }
     response.status(status).render('pages/error', {
       message: message,
       statusCode: status,

@@ -16,6 +16,7 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { InternshipService } from './internship.service';
@@ -37,7 +38,12 @@ import { EtagInterceptor } from '../common/interceptors/etag.interceptor';
 import { memoryStorage } from 'multer';
 import { FileCreateImageStrategy } from './strategy/create-image.strategy';
 import { FileUpdateImageStrategy } from './strategy/update-image.strategy';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from 'src/auth/role.enum';
 
+@UseGuards(RolesGuard)
+@Roles(Role.Admin)
 @ApiTags('internships')
 @Controller('api/internships')
 @ApiExtraModels(CreateInternshipInput, UpdateInternshipInput)

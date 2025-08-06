@@ -9,7 +9,6 @@ import {
   Query,
   UseInterceptors,
   UploadedFile,
-  Req,
   Sse,
   MessageEvent,
   ParseUUIDPipe,
@@ -18,9 +17,12 @@ import {
   MaxFileSizeValidator,
   FileTypeValidator,
   Redirect,
+  Req,
+  Res,
+  UseGuards,
 } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Request } from 'express';
 import { memoryStorage } from 'multer';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -34,6 +36,13 @@ import { TagService } from 'src/tag/tag.service';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { FileUpdateImageStrategy } from './strategy/update-image.strategy';
 import { FileCreateImageStrategy } from './strategy/create-image.strategy';
+import Session from 'supertokens-node/recipe/session';
+import { UserService } from 'src/user/user.service';
+import { Role } from 'src/auth/role.enum';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { PublicAccess } from 'src/auth/decorators/public.decorator';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+
 
 @ApiExcludeController()
 @Controller('internship')
@@ -42,15 +51,20 @@ export class InternshipController {
     private readonly internshipService: InternshipService,
     private readonly categoryService: CategoryService,
     private readonly tagService: TagService,
+    private readonly userService: UserService,
   ) {}
 
+  @PublicAccess()
   @Get()
   @Render('pages/internships')
   async findByCategory(
-    @Query('category') categoryName: string,
     @Req() req: Request,
+    @Res() res: Response,
+    @Query('category') categoryName: string,
   ) {
-    const user = req.session['user'];
+    const session = await Session.getSession(req, res, { sessionRequired: false });
+    const authId = session?.getUserId();
+    const user = authId ? await this.userService.findByAuthId(authId) : null;
 
     const [rawInternships, categories] = await Promise.all([
       this.internshipService.findByCategory(categoryName),
@@ -72,9 +86,17 @@ export class InternshipController {
   }
 
   @Get('add')
+  @Roles(Role.Admin)
   @Render('pages/internship-add')
-  async showAddForm(@Req() req: Request) {
-    const user = req.session['user'];
+  @UseGuards(RolesGuard)
+  async showAddForm(
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const session = await Session.getSession(req, res, { sessionRequired: false });
+    const authId = session?.getUserId();
+    const user = authId ? await this.userService.findByAuthId(authId) : null;
+    
     const [categories, tags] = await Promise.all([
       this.categoryService.findAll(),
       this.tagService.findAll(),
@@ -90,6 +112,8 @@ export class InternshipController {
     };
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin)
   @Post('')
   @UseInterceptors(FileInterceptor('imageFile', { storage: memoryStorage() }))
   @Redirect('/internship')
@@ -125,13 +149,19 @@ export class InternshipController {
     };
   }
 
+
+  @PublicAccess()
   @Get('detail/:uuid')
   @Render('pages/internship-detail')
   async findOne(
-    @Param('uuid', ParseUUIDPipe) uuid: string,
     @Req() req: Request,
+    @Res() res: Response,
+    @Param('uuid', ParseUUIDPipe) uuid: string,
   ) {
-    const user = req.session['user'];
+    const session = await Session.getSession(req, res, { sessionRequired: false });
+    const authId = session?.getUserId();
+    const user = authId ? await this.userService.findByAuthId(authId) : null;
+    
     const [categories, internship] = await Promise.all([
       this.categoryService.findAll(),
       this.internshipService.findOne(uuid),
@@ -144,13 +174,19 @@ export class InternshipController {
     return { internship, menu, user };
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin)
   @Get('edit/:uuid')
   @Render('pages/internship-edit')
   async showEditForm(
-    @Param('uuid', ParseUUIDPipe) uuid: string,
     @Req() req: Request,
+    @Res() res: Response,
+    @Param('uuid', ParseUUIDPipe) uuid: string,
   ) {
-    const user = req.session['user'];
+    const session = await Session.getSession(req, res, { sessionRequired: false });
+    const authId = session?.getUserId();
+    const user = authId ? await this.userService.findByAuthId(authId) : null;
+    
     const [categories, internship, tags] = await Promise.all([
       this.categoryService.findAll(),
       this.internshipService.findOne(uuid),
@@ -169,6 +205,8 @@ export class InternshipController {
     };
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin)
   @Patch(':uuid')
   @UseInterceptors(FileInterceptor('imageFile', { storage: memoryStorage() }))
   @Redirect('/internship')
@@ -208,6 +246,8 @@ export class InternshipController {
     };
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin)
   @Delete(':uuid')
   @Redirect('/internship')
   async remove(@Param('uuid', ParseUUIDPipe) uuid: string) {
@@ -219,6 +259,7 @@ export class InternshipController {
     };
   }
 
+  @PublicAccess()
   @Sse('sse')
   internshipEvents(): Observable<MessageEvent> {
     return this.internshipService.getEventsStream().pipe(
