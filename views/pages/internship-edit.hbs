@@ -1,0 +1,54 @@
+{{#section 'styles'}}
+<link rel="stylesheet" href="/blocks/internship-form/internship-form.css">
+<link rel="stylesheet" href="/blocks/internship-form/internship-form__button.css">
+<link rel="stylesheet" href="/blocks/internship-form/internship-form__button_lighter.css">
+<link rel="stylesheet" href="/blocks/internship-form/internship-form__input.css">
+<link rel="stylesheet" href="/blocks/internship-form/internship-form__label.css">
+<link rel="stylesheet" href="/blocks/main/main__title.css">
+{{/section}}
+
+<main class="main">
+  <p class="main__title">Редактировать стажировку</p>
+
+  <form class="internship-form" action="/internship/{{internship.uuid}}" method="POST">
+    <input type="hidden" name="_method" value="PATCH">
+
+    <label for="name" class="internship-form__label">Название стажировки:</label>
+    <input type="text" id="name" name="name" class="internship-form__input" value="{{internship.name}}" required>
+
+    <label for="companyUrl" class="internship-form__label">Ссылка на компанию:</label>
+    <input type="url" id="companyUrl" name="companyUrl" class="internship-form__input" value="{{internship.companyUrl}}"
+      required>
+
+    <label for="imageFile" class="internship-form__label">Новый логотип (оставьте пустым, чтобы не менять):</label>
+    <input type="file" id="imageFile" name="imageFile" class="internship-form__input">
+
+    <label for="date" class="internship-form__label">Даты:</label>
+    <input type="text" id="date" name="date" class="internship-form__input" value="{{internship.date}}">
+
+    <label for="category" class="internship-form__label">Категория:</label>
+    <input list="categoryList" id="category" name="category" class="internship-form__input" value="{{internship.category.name}}">
+    <datalist id="categoryList">
+      {{#each menu}}
+        <option value="{{this.label}}">{{this.label}}</option>
+      {{/each}}
+    </datalist>
+
+    <label for="tags" class="internship-form__label">Теги (через запятую):</label>
+    {{!-- Собираем теги в строку через запятую --}}
+    <input list="tagList" type="text" id="tags" name="tags" class="internship-form__input" value="{{#each internship.tags}}{{this.name}}{{#unless @last}}, {{/unless}}{{/each}}">
+    <datalist id="tagList">
+      {{#each tags}}
+        <option value="{{this.name}}">{{this.name}}</option>
+      {{/each}}
+    </datalist>
+
+    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+      <input type="hidden" name="closed" value="false">
+      <input type="checkbox" id="closed" name="closed" value="true" style="margin-right: 10px;">
+      <label for="closed" class="internship-form__label" style="margin-bottom: 0;">Закрыта</label>
+    </div>
+    
+    <button type="submit" class="internship-form__button">Сохранить изменения</button>
+  </form>
+</main>

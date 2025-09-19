@@ -1,0 +1,11 @@
+.contacts__contact {
+    margin-right: 2vw;
+    margin-left: 2vw;
+}
+
+/* @media screen and (width >=576px) {
+    .contacts__contact {
+        margin-right: 20px;
+        margin-left: 20px;
+    }
+} */

@@ -1,0 +1,37 @@
+.main {
+    flex: 1 0 auto;
+
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 35px;
+    margin-bottom: 50px;
+
+    color: #000;
+
+    background: #FFF;
+
+}
+
+@media screen and (width >=375px) {
+    .main {
+        margin-top: 50px;
+    }
+}
+
+@media screen and (width >=551px) {
+    .main {
+        margin-top: 50px;
+    }
+}
+
+@media screen and (width >=769px) {
+    .main {
+        margin-top: 55px;
+    }
+}
+
+@media screen and (width >=1440px) {
+    .main {
+        margin-top: 65px;
+    }
+}

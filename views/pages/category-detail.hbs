@@ -1,0 +1,33 @@
+{{#section 'styles'}}
+<link rel="stylesheet" href="/blocks/main/main__title.css">
+<link rel="stylesheet" href="/blocks/details/details.css">
+<link rel="stylesheet" href="/blocks/detail-item/detail-item.css">
+<link rel="stylesheet" href="/blocks/detail-item/detail-item__label.css">
+<link rel="stylesheet" href="/blocks/detail-item/detail-item__value.css">
+<link rel="stylesheet" href="/blocks/detail-buttons/detail-buttons.css">
+<link rel="stylesheet" href="/blocks/detail-buttons/detail-buttons__el.css">
+<link rel="stylesheet" href="/blocks/internship-form/internship-form__button.css">
+{{/section}}
+
+{{#section 'scripts'}}
+{{/section}}
+
+<main class="main">
+  <p class="main__title">Детали категории</p>
+
+  <div class="details">
+    <div class="detail-item">
+      <span class="detail-item__label">Название:</span>
+      <span class="detail-item__value">{{category.name}}</span>
+    </div>
+
+    <div class="detail-buttons">
+      <a href="/category/edit/{{category.uuid}}" class="detail-buttons__el internship-form__button">Редактировать</a>
+      <form style="display: inline;" action="/category/{{category.uuid}}" method="POST">
+        <input type="hidden" name="_method" value="DELETE">
+        <button type="submit" class="detail-buttons__el internship-form__button"
+          onclick="return confirm('Вы уверены, что хотите удалить эту категорию?')">Удалить</button>
+      </form>
+    </div>
+  </div>
+</main>

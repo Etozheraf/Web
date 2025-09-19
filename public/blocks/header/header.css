@@ -1,0 +1,62 @@
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+
+    box-sizing: border-box;
+    width: 100%;
+    height: 35px;
+    padding-right: 2%;
+    padding-left: 2%;
+    border-bottom: 1px solid #3c3c3c20;
+
+    font-family: Roboto, sans-serif;
+    font-size: 0.6em;
+    font-weight: 500;
+    line-height: 120%;
+
+    background-color: #fff;
+}
+
+@media screen and (width >= 375px) {
+    .header {
+        height: 50px;
+
+        font-size: 0.7em;
+    }
+}
+
+@media screen and (width >= 551px) {
+    .header {
+        height: 50px;
+
+        font-size: 0.9em;
+    }
+}
+
+@media screen and (width >= 769px) {
+    .header {
+        height: 55px;
+
+        font-size: 1.1em;
+    }
+}
+
+@media screen and (width >= 1024px) {
+    .header {
+        height: 55px;
+
+        font-size: 1.2em;
+    }
+}
+
+@media screen and (width >= 1440px) {
+    .header {
+        height: 65px;
+
+        font-size: 1.3em;
+    }
+}

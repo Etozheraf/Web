@@ -1,0 +1,7 @@
+.logo {
+    height: 80%;
+
+    /* max-width: 45px; */
+
+    object-fit: contain;
+}

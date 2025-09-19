@@ -1,0 +1,22 @@
+{{#section 'styles'}}
+  <link rel="stylesheet" href="/blocks/internship-form/internship-form.css">
+  <link rel="stylesheet" href="/blocks/internship-form/internship-form__button.css">
+  <link rel="stylesheet" href="/blocks/internship-form/internship-form__input.css">
+  <link rel="stylesheet" href="/blocks/internship-form/internship-form__label.css">
+  <link rel="stylesheet" href="/blocks/main/main__title.css">
+{{/section}}
+
+{{#section 'scripts'}}
+{{/section}}
+
+<main class="main">
+  <p class="main__title">Добавить новый тег</p>
+
+  <form class="internship-form" action="/tag" method="POST">
+    <label for="name" class="internship-form__label">Название тега:</label>
+    <input type="text" id="name" name="name" class="internship-form__input" required>
+
+    <button type="submit" class="internship-form__button">Добавить тег</button>
+    <a href="/tag" class="internship-form__button internship-form__button_lighter">Отмена</a>
+  </form>
+</main> 

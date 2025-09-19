@@ -1,0 +1,24 @@
+{{#section 'styles'}}
+  <link rel="stylesheet" href="/blocks/internship-form/internship-form.css">
+  <link rel="stylesheet" href="/blocks/internship-form/internship-form__button.css">
+  <link rel="stylesheet" href="/blocks/internship-form/internship-form__input.css">
+  <link rel="stylesheet" href="/blocks/internship-form/internship-form__label.css">
+  <link rel="stylesheet" href="/blocks/main/main__title.css">
+{{/section}}
+
+{{#section 'scripts'}}
+{{/section}}
+
+<main class="main">
+  <p class="main__title">Редактировать тег</p>
+
+  <form class="internship-form" action="/tag/{{tag.uuid}}" method="POST">
+    <input type="hidden" name="_method" value="PATCH">
+    
+    <label for="name" class="internship-form__label">Название тега:</label>
+    <input type="text" id="name" name="name" class="internship-form__input" value="{{tag.name}}" required>
+
+    <button type="submit" class="internship-form__button">Сохранить изменения</button>
+    <a href="/tag/detail/{{tag.uuid}}" class="internship-form__button internship-form__button_lighter">Отмена</a>
+  </form>
+</main> 

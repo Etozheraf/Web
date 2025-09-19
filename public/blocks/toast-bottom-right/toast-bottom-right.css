@@ -1,0 +1,21 @@
+.toast-bottom-right {
+    bottom: 50px !important;
+}
+
+@media screen and (width >=551px) {
+    .toast-bottom-right {
+        bottom: 60px !important;
+    }
+}
+
+@media screen and (width >=769px) {
+    .toast-bottom-right {
+        bottom: 80px !important;
+    }
+}
+
+@media screen and (width >=1441px) {
+    .toast-bottom-right {
+        bottom: 100px !important;
+    }
+}

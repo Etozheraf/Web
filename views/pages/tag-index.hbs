@@ -1,0 +1,29 @@
+{{#section 'styles'}}
+<link rel="stylesheet" href="/blocks/main/main__title.css">
+<link rel="stylesheet" href="/blocks/internships-list/internships-list.css">
+<link rel="stylesheet" href="/blocks/internships-list/internships-list_title.css">
+<link rel="stylesheet" href="/blocks/internship-form/internship-form__button.css">
+<link rel="stylesheet" href="/blocks/category-list/category-list.css">
+<link rel="stylesheet" href="/blocks/category-list/category-list__item.css">
+{{/section}}
+
+{{#section 'scripts'}}
+{{/section}}
+
+<main class="main">
+  <p class="main__title">Список тегов</p>
+
+  <div class="category-list">
+    {{#if tags.length}}
+    {{#each tags}}
+    <div class="category-list__item">
+      <a href="/tag/detail/{{this.uuid}}">{{this.name}}</a>
+    </div>
+    {{/each}}
+    {{else}}
+    <div class="category-list__item">
+      <p>Теги не найдены.</p>
+    </div>
+    {{/if}}
+  </div>
+</main>
