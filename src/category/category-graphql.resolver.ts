@@ -2,8 +2,14 @@ import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { CategoryService } from './category.service';
 import { CategoryObject } from './dto/category.object';
 import { CreateCategoryInput } from './dto/create-category.input';
+import { UseGuards } from '@nestjs/common';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '../auth/role.enum';
+import { GqlRolesGuard } from '../auth/guards/gql-roles.guard';
 
 @Resolver(() => CategoryObject)
+@UseGuards(GqlRolesGuard)
+@Roles(Role.Admin)
 export class CategoryGraphQLResolver {
   constructor(private readonly categoryService: CategoryService) {}
 

@@ -6,51 +6,57 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { GqlArgumentsHost } from '@nestjs/graphql';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
-    const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request>();
-
     const status = this.getStatus(exception);
     const message = this.getMessage(exception);
 
-    const isApiRoute = request.url.startsWith('/api/');
+    if (host.getType() === 'http') {
+      const ctx = host.switchToHttp();
+      const response = ctx.getResponse<Response>();
+      const request = ctx.getRequest<Request>();
+      const isApiRoute = request.url.startsWith('/api/');
 
-    console.log(exception);
+      console.log(exception);
 
-    if (isApiRoute) {
-      if (status >= 500) {
+      if (isApiRoute) {
+        if (status >= 500) {
+          response.status(status).json({
+            statusCode: status,
+            timestamp: new Date().toISOString(),
+            path: request.url,
+            method: request.method,
+          });
+          return;
+        }
         response.status(status).json({
           statusCode: status,
           timestamp: new Date().toISOString(),
           path: request.url,
           method: request.method,
+          message: message,
         });
         return;
       }
-      response.status(status).json({
-        statusCode: status,
-        timestamp: new Date().toISOString(),
-        path: request.url,
-        method: request.method,
-        message: message,
-      });
-      return;
-    }
 
-    if (status >= 500) {
+      if (status >= 500) {
+        response.status(status).render('pages/error', {
+          statusCode: status,
+        });
+        return;
+      }
       response.status(status).render('pages/error', {
+        message: message,
         statusCode: status,
       });
-      return;
+    } else if (host.getType<any>() === 'graphql') {
+      const gqlHost = GqlArgumentsHost.create(host);
+      console.error(exception);
+      return exception;
     }
-    response.status(status).render('pages/error', {
-      message: message,
-      statusCode: status,
-    });
   }
 
   private getStatus(exception: unknown): number {

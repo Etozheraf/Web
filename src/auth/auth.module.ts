@@ -14,11 +14,17 @@ import {
   SuperTokensConfigInjectionToken,
 } from './config.interface';
 import { AuthMiddleware } from './auth.middleware';
+import { GqlRolesGuard } from './guards/gql-roles.guard';
 
 @Module({
   imports: [UserModule],
   controllers: [AuthApiController],
-  providers: [AuthService, RolesService, AuthMiddleware],
+  providers: [
+    AuthService,
+    RolesService,
+    AuthMiddleware,
+    GqlRolesGuard,
+  ],
   exports: [AuthService, RolesService],
 })
 export class AuthModule implements NestModule {

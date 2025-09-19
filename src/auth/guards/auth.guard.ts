@@ -1,7 +1,13 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import Session from 'supertokens-node/recipe/session';
+import { GqlExecutionContext } from '@nestjs/graphql';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -12,16 +18,22 @@ export class AuthGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-    if (isPublic) {
-      return true;
+    if (isPublic) return true;
+
+    let req, res;
+
+    if (context.getType<'graphql'>() === 'graphql') {
+      const gqlCtx = GqlExecutionContext.create(context).getContext();
+      req = gqlCtx.req;
+      res = gqlCtx.res;
+    } else {
+      const httpCtx = context.switchToHttp();
+      req = httpCtx.getRequest();
+      res = httpCtx.getResponse();
     }
 
-    const ctx = context.switchToHttp();
-    const req = ctx.getRequest();
-    const res = ctx.getResponse();
-
     try {
-      const session = await Session.getSession(req, res);
+      await Session.getSession(req, res, { sessionRequired: true });
       return true;
     } catch {
       throw new UnauthorizedException('Unauthorized access');

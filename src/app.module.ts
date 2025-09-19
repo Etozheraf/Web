@@ -51,7 +51,7 @@ import { Role } from './auth/role.enum';
       autoSchemaFile: true,
       playground: true,
       introspection: true,
-      context: ({ req }) => ({ req }),
+      context: ({ req, res }) => ({ req, res }),
       validationRules: [
         createComplexityRule({
           estimators: [
