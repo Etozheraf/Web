@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  uuid     String    @id @default(uuid())
+  authId   String    @unique
+  name     String?
+  email    String    @unique
+  role     Role      @default(USER)
+
+  Request  Request[]
+}
+
+model Category {
+  uuid        String       @id @default(uuid())
+  name        String       @unique
+
+  internships Internship[]
+}
+
+model Tag {
+  uuid        String       @id @default(uuid())
+  name        String       @unique
+
+  internships Internship[]
+}
+
+model Internship {
+  uuid       String  @id @default(uuid())
+  name       String
+  date       String
+  imgUrl     String
+  companyUrl String
+  closed     Boolean
+
+  category     Category @relation(fields: [categoryUuid], references: [uuid], onDelete: Cascade)
+  categoryUuid String
+  tags         Tag[]
+  Request      Request[]
+
+  @@unique([name, categoryUuid])
+}
+
+model Request {
+  uuid           String     @id @default(uuid())
+  name           String
+  status         Status
+  date           String
+
+  internship     Internship @relation(fields: [internshipUuid], references: [uuid], onDelete: Cascade)
+  internshipUuid String
+  user           User       @relation(fields: [userUuid], references: [uuid], onDelete: Cascade)
+  userUuid       String
+}
+
+enum Status {
+  Active
+  Closed
+}

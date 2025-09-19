@@ -1,0 +1,9 @@
+<div class="internship-card {{#if closed}}internship-card_closed{{/if}}">
+  <a class="internship-card__header {{customClass}}" href="{{companyUrl}}">
+    <img src="{{imgUrl}}" class="internship-card__logo" alt="{{alt}}">
+  </a>
+  <div class="internship-card__description">
+    <p>{{name}}</p>
+    {{#if date}}<p>{{{date}}}</p>{{/if}}
+  </div>
+</div>

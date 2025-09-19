@@ -1,0 +1,22 @@
+{{#section 'styles'}}
+  <link rel="stylesheet" href="/blocks/internship-form/internship-form.css">
+  <link rel="stylesheet" href="/blocks/internship-form/internship-form__button.css">
+  <link rel="stylesheet" href="/blocks/internship-form/internship-form__input.css">
+  <link rel="stylesheet" href="/blocks/internship-form/internship-form__label.css">
+  <link rel="stylesheet" href="/blocks/main/main__title.css">
+{{/section}}
+
+{{#section 'scripts'}}
+{{/section}}
+
+<main class="main">
+  <p class="main__title">Добавить новую категорию</p>
+
+  <form class="internship-form" action="/category" method="POST">
+    <label for="name" class="internship-form__label">Название категории:</label>
+    <input type="text" id="name" name="name" class="internship-form__input" required>
+
+    <button type="submit" class="internship-form__button">Добавить категорию</button>
+    <a href="/category" class="internship-form__button internship-form__button_lighter">Отмена</a>
+  </form>
+</main> 

@@ -1,0 +1,30 @@
+{{#section 'styles'}}
+<link rel="stylesheet" href="/blocks/internship-form/internship-form.css">
+<link rel="stylesheet" href="/blocks/internship-form/internship-form__button.css">
+<link rel="stylesheet" href="/blocks/internship-form/internship-form__button_lighter.css">
+<link rel="stylesheet" href="/blocks/internship-form/internship-form__input.css">
+<link rel="stylesheet" href="/blocks/internship-form/internship-form__label.css">
+<link rel="stylesheet" href="/blocks/main/main__title.css">
+{{/section}}
+
+<main class="main">
+  <p class="main__title">Редактировать профиль</p>
+
+  <form class="internship-form" action="/user" method="POST">
+    <input type="hidden" name="_method" value="PATCH">
+
+    <label for="name" class="internship-form__label">Имя:</label>
+    <input type="text" id="name" name="name" class="internship-form__input" value="{{user.name}}" required>
+
+    <label for="email" class="internship-form__label">Email:</label>
+    <input type="email" id="email" name="email" class="internship-form__input" value="{{user.email}}" required>
+
+    <label for="currentPassword" class="internship-form__label">Текущий пароль (для подтверждения):</label>
+    <input type="password" id="currentPassword" name="currentPassword" class="internship-form__input" required>
+
+    <label for="password" class="internship-form__label">Новый пароль (оставьте пустым, чтобы не менять):</label>
+    <input type="password" id="password" name="password" class="internship-form__input">
+
+    <button type="submit" class="internship-form__button">Сохранить изменения</button>
+  </form>
+</main>

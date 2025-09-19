@@ -1,0 +1,37 @@
+{{#section 'styles'}}
+  <link rel="stylesheet" href="/blocks/internship-card/internship-card.css">
+  <link rel="stylesheet" href="/blocks/internship-card/internship-card__description.css">
+  <link rel="stylesheet" href="/blocks/internship-card/internship-card__header.css">
+  <link rel="stylesheet" href="/blocks/internship-card/internship-card__header_kaspersky.css">
+  <link rel="stylesheet" href="/blocks/internship-card/internship-card__header_liga.css">
+  <link rel="stylesheet" href="/blocks/internship-card/internship-card__header_ozon.css">
+  <link rel="stylesheet" href="/blocks/internship-card/internship-card__header_yadro.css">
+  <link rel="stylesheet" href="/blocks/internship-card/internship-card__logo.css">
+  <link rel="stylesheet" href="/blocks/internship-card/internship-card_closed.css">
+  <link rel="stylesheet" href="/blocks/internships-list/internships-list.css">
+  <link rel="stylesheet" href="/blocks/internships-list/internships-list_title.css">
+{{/section}}
+
+{{#section 'scripts'}}
+{{/section}}
+
+
+
+<main class="main">
+  <nav class="internship-list">
+    <p class="internships-list__title">Доступные стажировки</p>
+
+    {{#each internships}}
+      {{> internship-card
+        href=this.href
+        logo=this.logo
+        alt=this.alt
+        name=this.name
+        status=this.status
+        headerClass=this.headerClass
+        closed=this.closed
+      }}
+    {{/each}}
+
+  </nav>
+</main>

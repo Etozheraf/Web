@@ -1,0 +1,10 @@
+{{#if user}}
+<div class="form">
+    <p><a href="/requests">Мои стажировки</a></p>
+</div>
+<p><a href="/user">{{user.name}}</a></p>
+{{else}}
+<div class="form">
+</div>
+<button class="login">Вход/Регистрация</button>
+{{/if}}

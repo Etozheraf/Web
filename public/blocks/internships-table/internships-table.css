@@ -1,0 +1,14 @@
+.internships-table {
+    width: 95%;
+    margin: 0 auto;
+    margin-top: 15px;
+    border-collapse: collapse;
+    overflow-x: auto;
+}
+
+@media screen and (width <= 550px) {
+    .internships-table {
+        width: 85%;
+        margin-top: 15px;
+    }
+}

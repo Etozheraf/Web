@@ -1,0 +1,56 @@
+{{#section 'styles'}}
+<link rel="stylesheet" href="/blocks/main/main__title.css">
+<link rel="stylesheet" href="/blocks/details/details.css">
+<link rel="stylesheet" href="/blocks/detail-item/detail-item.css">
+<link rel="stylesheet" href="/blocks/detail-item/detail-item__image.css">
+<link rel="stylesheet" href="/blocks/detail-item/detail-item__label.css">
+<link rel="stylesheet" href="/blocks/detail-item/detail-item__value.css">
+<link rel="stylesheet" href="/blocks/detail-item/detail-item_with-image.css">
+<link rel="stylesheet" href="/blocks/detail-buttons/detail-buttons.css">
+<link rel="stylesheet" href="/blocks/detail-buttons/detail-buttons__el.css">
+{{/section}}
+
+<main class="main">
+  <p class="main__title">Информация о стажировке</p>
+
+  <div class="details">
+    <div class="detail-item">
+      <span class="detail-item__label">Название:</span>
+      <span class="detail-item__value">{{internship.name}}</span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-item__label">Категория:</span>
+      <span class="detail-item__value">{{internship.category.name}}</span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-item__label">Статус:</span>
+      <span class="detail-item__value">{{#if internship.closed}}Закрыта{{else}}Активна{{/if}}</span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-item__label">Даты:</span>
+      <span class="detail-item__value">{{internship.date}}</span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-item__label">Описание:</span>
+      <span class="detail-item__value">{{#each internship.tags}}{{name}}, {{/each}}</span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-item__label">Ссылка:</span>
+      <span class="detail-item__value">{{internship.companyUrl}}</span>
+    </div>
+    <div class="detail-item detail-item_with-image">
+      <span class="detail-item__label">Логотип:</span>
+      <a href="{{internship.companyUrl}}" target="_blank" rel="noopener noreferrer">
+        <img src="{{internship.imgUrl}}" alt="Логотип компании" class="detail-item__image">
+      </a>
+    </div>
+
+    <div class="detail-buttons">
+      <a href="/internship/edit/{{internship.uuid}}" class="detail-buttons__el">Редактировать</a>
+      <form action="/internship/{{internship.uuid}}" method="POST">
+        <input type="hidden" name="_method" value="DELETE" />
+        <button type="submit" class="detail-buttons__el">Удалить</button>
+      </form>
+    </div>
+  </div>
+</main>

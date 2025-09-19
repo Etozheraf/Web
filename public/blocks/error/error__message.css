@@ -1,0 +1,8 @@
+.error__message {
+  font-size: 1.75rem;
+  color: #000000b3;
+  margin-top: 1rem;
+  margin-bottom: 2.5rem;
+  max-width: 80%;
+  white-space: pre-line;
+}

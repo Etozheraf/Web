@@ -1,0 +1,29 @@
+.footer_fixed {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000; 
+}
+
+.main {
+    margin-bottom: 40px ;
+}
+
+@media screen and (width >=576px) {
+    .main {
+        height: 92vh !important;
+    }
+}
+
+@media screen and (width >=768px) {
+    .main {
+        height: 92vh !important;
+    }
+}
+
+@media screen and (width >=1440px) {
+    .main {
+        height: 92vh !important;
+    }
+}

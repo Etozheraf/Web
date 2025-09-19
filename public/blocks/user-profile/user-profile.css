@@ -1,0 +1,14 @@
+.user-profile {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    padding-left: 8vw;
+}
+
+@media screen and (width >=576px) {
+    .user-profile {
+        margin-bottom: 30px;
+        padding-left: 60px;
+    }
+}

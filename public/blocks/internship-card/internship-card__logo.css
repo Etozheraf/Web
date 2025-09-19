@@ -1,0 +1,6 @@
+.internship-card__logo{
+    width: 70%;
+    max-height: 70%;
+
+    object-fit: contain;
+}

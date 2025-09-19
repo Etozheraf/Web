@@ -1,0 +1,10 @@
+.detail-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.detail-buttons form {
+    margin: 0;
+}

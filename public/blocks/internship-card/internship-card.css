@@ -1,0 +1,42 @@
+.internship-card {
+    display: flex;
+    flex-direction: column;
+
+    height: 35vh;
+    border: 1px solid rgb(0 0 0 / 20%);
+    border-radius: 20px;
+    overflow: hidden;
+
+    background: #FFF;
+    box-shadow: 1px 1px 1px rgb(0 0 0 / 20%);
+}
+
+@media screen and (width >=576px) {
+    .internship-card {
+        height: 35vh;
+    }
+}
+
+@media screen and (width >=768px) {
+    .internship-card {
+        height: 40vh;
+    }
+}
+
+@media screen and (width >=1024px) {
+    .internship-card {
+        height: 40vh;
+    }
+}
+
+@media screen and (width >=1200px) {
+    .internship-card {
+        height: 40vh;
+    }
+}
+
+@media screen and (width >=1440px) {
+    .internship-card {
+        height: 40vh;
+    }
+}
