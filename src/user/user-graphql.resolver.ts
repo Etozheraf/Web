@@ -1,9 +1,14 @@
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { UserService } from './user.service';
 import { UserObject } from './dto/user.object';
-import { CreateUserInput } from './dto/create-user.input';
+import { UseGuards } from '@nestjs/common';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '../auth/role.enum';
+import { GqlRolesGuard } from '../auth/guards/gql-roles.guard';
 
 @Resolver(() => UserObject)
+@UseGuards(GqlRolesGuard)
+@Roles(Role.Admin)
 export class UserGraphQLResolver {
   constructor(private readonly userService: UserService) {}
 

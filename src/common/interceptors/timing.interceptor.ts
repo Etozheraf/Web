@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
+import { GqlExecutionContext } from '@nestjs/graphql';
 
 @Injectable()
 export class TimingInterceptor implements NestInterceptor {
@@ -14,11 +15,30 @@ export class TimingInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const startTime = Date.now();
-    const response = context.switchToHttp().getResponse();
-    const request = context.switchToHttp().getRequest();
-    const { method, url } = request;
 
-    const acceptHeader = request.headers['accept'] || '';
+    let req: any;
+    let res: any;
+    let method = 'GRAPHQL';
+    let url = context.getClass().name; // для GraphQL можно выводить имя ресолвера
+
+    if (context.getType<'graphql'>() === 'graphql') {
+      const gqlCtx = GqlExecutionContext.create(context).getContext();
+      req = gqlCtx.req;
+      res = gqlCtx.res;
+
+      // если Express req/res проброшены через GraphQLModule
+      if (req?.method && req?.url) {
+        method = req.method;
+        url = req.url;
+      }
+    } else {
+      req = context.switchToHttp().getRequest();
+      res = context.switchToHttp().getResponse();
+      method = req.method;
+      url = req.url;
+    }
+
+    const acceptHeader = req?.headers?.['accept'] || '';
 
     if (acceptHeader.includes('text/event-stream')) {
       return next.handle();
@@ -29,8 +49,8 @@ export class TimingInterceptor implements NestInterceptor {
         const elapsedTime = Date.now() - startTime;
         this.logger.log(`[${method}] ${url} - ${elapsedTime}ms`);
 
-        if (!acceptHeader.includes('text/html') && !response.headersSent) {
-          response.setHeader('X-Elapsed-Time', `${elapsedTime}ms`);
+        if (!acceptHeader.includes('text/html') && res && !res.headersSent) {
+          res.setHeader('X-Elapsed-Time', `${elapsedTime}ms`);
         }
       }),
       map((data) => {

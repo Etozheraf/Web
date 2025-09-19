@@ -5,8 +5,14 @@ import { CreateInternshipInput } from './dto/create-internship.input.graphql';
 import { UpdateInternshipInput } from './dto/update-internship.input.graphql';
 import { UrlCreateImageStrategy } from './strategy/create-image.strategy';
 import { UrlUpdateImageStrategy } from './strategy/update-image.strategy';
+import { UseGuards } from '@nestjs/common';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { Role } from '../auth/role.enum';
+import { GqlRolesGuard } from '../auth/guards/gql-roles.guard';
 
 @Resolver(() => InternshipObject)
+@UseGuards(GqlRolesGuard)
+@Roles(Role.Admin)
 export class InternshipGraphQLResolver {
   constructor(private readonly internshipService: InternshipService) {}
 
