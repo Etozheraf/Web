@@ -20,6 +20,7 @@ import {
   Req,
   Res,
   UseGuards,
+  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -47,6 +48,8 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 @ApiExcludeController()
 @Controller('internship')
 export class InternshipController {
+  private readonly logger = new Logger(InternshipController.name);
+
   constructor(
     private readonly internshipService: InternshipService,
     private readonly categoryService: CategoryService,
@@ -130,6 +133,11 @@ export class InternshipController {
     )
     file: Express.Multer.File,
   ) {
+    this.logger.debug(`Updating internship ${formDto.name}`);
+    this.logger.debug(`Body: ${JSON.stringify(formDto)}`);
+    if (file) {
+      this.logger.debug(`File: ${file.originalname}`);
+    }
     const input = {
       name: formDto.name,
       companyUrl: formDto.companyUrl,
@@ -224,6 +232,12 @@ export class InternshipController {
     )
     file?: Express.Multer.File,
   ) {
+    this.logger.debug(`Updating internship ${uuid}`);
+    this.logger.debug(`Body: ${JSON.stringify(formDto)}`);
+    if (file) {
+      this.logger.debug(`File: ${file.originalname}`);
+    }
+
     const input = {
       name: formDto.name,
       companyUrl: formDto.companyUrl,
@@ -240,10 +254,13 @@ export class InternshipController {
     };
 
     await this.internshipService.update(uuid, input, new FileUpdateImageStrategy(file));
-    return {
+    
+    const response = {
       url: `/internship?category=${input.categoryName || 'all'}`,
       statusCode: 302
     };
+    this.logger.debug(`Redirecting to ${response.url}`);
+    return response;
   }
 
   @UseGuards(RolesGuard)

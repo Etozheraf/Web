@@ -44,11 +44,11 @@
     </datalist>
 
     <div style="display: flex; align-items: center; margin-bottom: 15px;">
-      <input type="checkbox" id="closed" name="closed" value="true" {{#if internship.closed}}checked{{/if}}
-        style="margin-right: 10px;">
+      <input type="hidden" name="closed" value="false">
+      <input type="checkbox" id="closed" name="closed" value="true" style="margin-right: 10px;">
       <label for="closed" class="internship-form__label" style="margin-bottom: 0;">Закрыта</label>
     </div>
-
+    
     <button type="submit" class="internship-form__button">Сохранить изменения</button>
   </form>
 </main>

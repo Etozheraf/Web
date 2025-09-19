@@ -32,10 +32,16 @@ export class CreateInternshipDto {
   @IsNotEmpty()
   @IsUrl()
   companyUrl: string;
-  
+
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) {
+      return value.includes('true');
+    }
+    return value === 'true';
+  })
   @IsBoolean()
-  @Transform(({ value }) => value === 'true')
   closed: boolean;
+
 
   @IsOptional()
   @IsString()
