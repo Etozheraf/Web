@@ -89,10 +89,7 @@ export class RequestController {
       throw new NotFoundException('Стажировка не найдена в указанной категории');
     }
 
-    createRequestDto.userUuid = user.uuid;
-    createRequestDto.internshipUuid = internship.uuid;
-
-    await this.requestService.create(createRequestDto);
+    await this.requestService.create(createRequestDto.name, createRequestDto.status, createRequestDto.dates, user.uuid, internship.uuid);
     return {
       url: '/requests',
       statusCode: 302

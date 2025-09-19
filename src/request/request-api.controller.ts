@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { RequestService } from './request.service';
-import { CreateRequestDto } from './dto/create-request.dto';
+import { CreateApiRequestDto } from './dto/create-api-request.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -38,15 +38,15 @@ export class RequestApiController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new request' })
-  @ApiBody({ type: CreateRequestDto })
+  @ApiBody({ type: CreateApiRequestDto })
   @ApiResponse({
     status: 201,
     description: 'The request has been successfully created.',
     type: Request,
   })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
-  async create(@Body() createRequestDto: CreateRequestDto) {
-    return this.requestService.create(createRequestDto);
+  async create(@Body() createRequestDto: CreateApiRequestDto) {
+    return this.requestService.create(createRequestDto.name, createRequestDto.status, createRequestDto.dates, createRequestDto.userUuid, createRequestDto.internshipUuid);
   }
 
   @Get()
