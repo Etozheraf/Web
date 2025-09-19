@@ -1,4 +1,6 @@
 import { IsOptional, IsString, IsBoolean, IsUrl, Length, Matches } from 'class-validator';
+import { Transform } from 'class-transformer';
+
 
 export class UpdateInternshipDto {
   @IsOptional()
@@ -24,9 +26,14 @@ export class UpdateInternshipDto {
   @IsUrl()
   companyUrl?: string;
 
-  @IsOptional()
   @IsBoolean()
-  closed?: boolean;
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) {
+      return value.includes('true');
+    }
+    return value === 'true';
+  })
+  closed: boolean;
 
   @IsOptional()
   @IsString()
