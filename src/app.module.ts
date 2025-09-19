@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { Module, OnModuleInit } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
@@ -18,10 +18,12 @@ import { TimingInterceptor } from './common/interceptors/timing.interceptor';
 import { CacheModule } from '@nestjs/cache-manager';
 import { StorageModule } from './storage/storage.module';
 import { AuthModule } from './auth/auth.module';
-import { ConfigService } from '@nestjs/config';
 import { AuthModuleConfig } from './auth/config.interface';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import { AuthService } from './auth/auth.service';
+import { UserService } from './user/user.service';
+import { Role } from './auth/role.enum';
 
 @Module({
   imports: [
@@ -34,7 +36,8 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
       useFactory: (
         configService: ConfigService,
       ): AuthModuleConfig => ({
-        connectionURI: configService.get<string>('SUPERTOKENS_CONNECTION_URI') || '',
+        connectionURI:
+          configService.get<string>('SUPERTOKENS_CONNECTION_URI') || '',
         apiKey: configService.get<string>('SUPERTOKENS_API_KEY'),
       }),
       inject: [ConfigService],
@@ -89,7 +92,38 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
     {
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter,
-    }
+    },
   ],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService,
+    private readonly configService: ConfigService,
+  ) {}
+
+  async onModuleInit() {
+    const adminEmail = this.configService.get<string>('ADMIN_EMAIL');
+    const adminPassword = this.configService.get<string>('ADMIN_PASSWORD');
+    const adminName = this.configService.get<string>('ADMIN_NAME');
+
+    if (!adminEmail || !adminPassword || !adminName) {
+      console.log(
+        'Admin credentials not found in .env file. Skipping admin creation.',
+      );
+      return;
+    }
+
+    const adminExists = await this.userService.findByEmail(adminEmail);
+
+    if (!adminExists) {
+      await this.authService.register({
+        email: adminEmail,
+        password: adminPassword,
+        name: adminName,
+        role: Role.Admin,
+      });
+      console.log('Admin user created successfully.');
+    }
+  }
+}
