@@ -6,15 +6,15 @@ import { CreateRequestDto } from './dto/create-request.dto';
 export class RequestService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createRequestDto: CreateRequestDto) {
+  async create(name: string, status:  'Active' | 'Closed', dates: string, userUuid: string, internshipUuid: string) {
     const request = await this.prisma.request.create({
       data: {
-        name: createRequestDto.name,
-        status: createRequestDto.status,
-        date: createRequestDto.dates,
+        name: name,
+        status: status,
+        date: dates,
 
-        userUuid: createRequestDto.userUuid,
-        internshipUuid: createRequestDto.internshipUuid,
+        userUuid: userUuid,
+        internshipUuid: internshipUuid,
       },
       include: {
         internship: true,
